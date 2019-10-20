@@ -1,18 +1,18 @@
 # Detector_YOLOv3
 The interface of YoloV3_detector with c++
 
-#V1.0
-#命令行参数
+##V1.0
+###命令行参数
 .\Detector.exe --image=Test\000200.jpg
 .\Detector.exe --video=video.mp4
 .\Detector.exe --rtsp=rtsp://admin:chenhui561X@124.192.234.186:5544/h264/ch1/main/av_stream
 
-#深度学习配置文件
+###深度学习配置文件
 voc.names
 yolov3-voc.cfg
 yolov3-voc_11400.weights
 
-#使用说明
+###使用说明
 1.可以检测
    1）有头盔无反光衣（程序中为字符串10）
    2）无头盔有反光衣（程序中为字符串01）
@@ -22,10 +22,10 @@ yolov3-voc_11400.weights
 2.可以检测图片，视频或者rtsp视频流，每秒选择一帧进行检测，如果检测到违规，截图保存在项目根目录。
 3.使用release模式生成的exe文件进行使用。
 
-#编译环境
+###编译环境
 VS2017+Opencv3.4.3
 
-#函数及变量说明
+###函数及变量说明
 1.变量
     float confThreshold = 0.8; // 置信度阈值
     long long DetectedIdx = 0; //违规图片索引
@@ -51,20 +51,21 @@ VS2017+Opencv3.4.3
     //是否有违规目标
     bool ProcessClass(vector<int>& classIds, vector<float>& confidences);
 
-#V2.0
-#使用说明
-1.可以检测
+##V2.0
+###使用说明
+   可以检测
    1）有头盔无反光衣（程序中为字符串10）
    2）无头盔有反光衣（程序中为字符串01）
    3）有头盔有反光衣（程序中为字符串11）
    4）无头盔无反光衣（程序中为字符串00）
+其中1 3 4违规。
 
-2.#深度学习配置文件
+###深度学习配置文件
 voc.names
 yolov3-voc.cfg
 yolov3-voc_9000.weights
 
-2.函数
+###函数及变量说明
  //是否有违规目标
     int ProcessClass(vector<int>& classIds, vector<float>& confidences);
    1）有头盔无反光衣 返回整型2，代表2级警告

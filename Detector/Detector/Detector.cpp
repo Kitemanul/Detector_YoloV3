@@ -13,6 +13,7 @@
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include "Configuration.h"
 
 const char* keys =
 "{help h         |      | Usage examples: \n\t\t./Detector.exe --image=dog.jpg \n\t\t./Detector.exe --video=run_sm.mp4}"
@@ -24,8 +25,11 @@ using namespace cv;
 using namespace dnn;
 using namespace std;
 
+//Load Configuration
+CfgLoader *Configuration = CfgLoader::instance();
+
 // Initialize the parameters
-float confThreshold = 0.6; // Confidence threshold
+float confThreshold=0.6; // Confidence threshold
 float nmsThreshold = 0.4;  // Non-maximum suppression threshold
 int inpWidth = 416;  // Width of network's input image
 int inpHeight = 416; // Height of network's input image
@@ -70,8 +74,10 @@ string DirOfDetectedFrame = "";
 
 //视频流帧率
 float FPS ;
-//两次检测之间间隔帧数
-
+//两次检测之间间隔时间
+int Interval;
+//成功检测到目标后，下一次检测间隔时间
+int DInterval;
 
 
 
@@ -79,7 +85,6 @@ int main(int argc, char** argv)
 {
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
-
 	if (parser.has("help")||parser.has("h"))
 	{
 		parser.printMessage();
@@ -87,6 +92,11 @@ int main(int argc, char** argv)
 	}
 
 	//Load Cfg
+	Configuration->init("Configuration.cfg");
+	Configuration->getCfgByName(pro_dir,"NNCfg_Dir");  //get神经网络配置文件目录
+	Configuration->getCfgByName(DirOfDetectedFrame, "DetectedFrameDir");//get违规图片保存目录
+	Configuration->getCfgByName(Interval, "Interval");
+	Configuration->getCfgByName(DInterval, "DInterval");
 	Net net=LoadNetCfg();
 
 	// Open a video file or an image file or a camera stream.	
@@ -101,7 +111,7 @@ int main(int argc, char** argv)
 	namedWindow(kWinName, WINDOW_NORMAL);
 
 	//两次检测之间间隔帧数,默认每秒处理一帧
-	int Interval = int((FPS / 2) + 1)*2;
+
 	int i = 0;
 
 	// Process frames.

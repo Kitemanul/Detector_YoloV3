@@ -266,3 +266,5 @@ __pycache__/
 *.names
 *.weights
 *.wmv
+*.rar
+*.exe
