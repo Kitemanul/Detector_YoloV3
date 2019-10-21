@@ -195,6 +195,59 @@ int CfgLoader::getCfgByName(int& value, std::string const & name, int segment)
 	return 0;
 }
 
+int CfgLoader::getCfgByName(float& value, std::string const & name, int segment)
+{
+	std::string s = "";
+	if (segment == Segment_COMMON)
+	{
+		auto it = m_commonMap.find(name.c_str());
+		if (it != m_commonMap.end())
+		{
+			s = it->second;
+		}
+	}
+	else if (segment == Segment_LOGGER)
+	{
+		auto it = m_loggerMap.find(name.c_str());
+		if (it != m_loggerMap.end())
+		{
+			s = it->second;
+		}
+	}
+	if (s.empty())
+	{
+		return -1;
+	}
+	int num = 0;
+	int c = 0;
+	int flag = 1;
+	for (int i = 0; i < s.length(); ++i)
+	{
+		c = s.at(i);
+		if (c == '-' && i == 0)
+		{
+			flag = -1;
+			continue;
+		}
+		if (c == '.')
+		{
+			break;
+		}
+		c -= '0';
+		if (c >= 0 && c <= 9)
+		{
+			num *= 10;
+			num += c;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	value = num * flag;
+	return 0;
+}
+
 int CfgLoader::getCfgByName(bool & value, std::string const & name, int segment)
 {
 	std::string s = "";

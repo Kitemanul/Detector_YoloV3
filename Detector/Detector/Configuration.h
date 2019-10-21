@@ -24,6 +24,7 @@ public:
 
 	int getCfgByName(std::string &value, std::string const& name, int segment = Segment_COMMON);
 	int getCfgByName(int& value, std::string const& name, int segment = Segment_COMMON);
+	int getCfgByName(float& value, std::string const& name, int segment = Segment_COMMON);
 	int getCfgByName(bool& value, std::string const& name, int segment = Segment_COMMON);
 private:
 	CfgLoader() = default;

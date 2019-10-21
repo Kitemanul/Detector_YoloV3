@@ -14,6 +14,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include "Configuration.h"
+#include "db_Operator.h"
 
 const char* keys =
 "{help h         |      | Usage examples: \n\t\t./Detector.exe --image=dog.jpg \n\t\t./Detector.exe --video=run_sm.mp4}"
@@ -60,7 +61,7 @@ void ProcessFrame(Mat frame,Net net);
 
 //Peocess Class 
 //如果检测到违规的目标，截图
-int ProcessClass(vector<int>& classIds, vector<float>& confidences);
+int ProcessClass(vector<int>& classIds, int classid);
 
 //配置文件 
 //voc.names
@@ -75,11 +76,16 @@ string DirOfDetectedFrame = "";
 //视频流帧率
 float FPS ;
 //两次检测之间间隔时间
-int Interval;
+float Interval;
 //成功检测到目标后，下一次检测间隔时间
-int DInterval;
+float DInterval;
+float slot;
 
-
+//数据库配置
+string DB_Name;
+string DB_User;
+string DB_Password;
+db_Operator *dbo;
 
 int main(int argc, char** argv)
 {
@@ -95,8 +101,14 @@ int main(int argc, char** argv)
 	Configuration->init("Configuration.cfg");
 	Configuration->getCfgByName(pro_dir,"NNCfg_Dir");  //get神经网络配置文件目录
 	Configuration->getCfgByName(DirOfDetectedFrame, "DetectedFrameDir");//get违规图片保存目录
-	Configuration->getCfgByName(Interval, "Interval");
+	Configuration->getCfgByName(Interval, "Interval");  
 	Configuration->getCfgByName(DInterval, "DInterval");
+	//load database cfg
+	Configuration->getCfgByName(DB_Name, "DB_Name");
+	Configuration->getCfgByName(DB_User, "DB_User");
+	Configuration->getCfgByName(DB_Password, "DB_Password");
+	//新建数据库操作对象
+	dbo = new db_Operator("sql server", DB_Name, DB_User, DB_Password);
 	Net net=LoadNetCfg();
 
 	// Open a video file or an image file or a camera stream.	
@@ -128,8 +140,9 @@ int main(int argc, char** argv)
 		}
 
 
-		if (i == Interval||i==0)
-		{   
+		if (i == slot||i==0)
+		{
+			slot = Interval;
 			i = 0;
 			Mat Processframe = frame.clone();
 			
@@ -348,18 +361,27 @@ void ProcessFrame(Mat frame,Net net)
 	putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
 
 	//process class and confidence
-	switch (ProcessClass(classIds, confidences))
+	for (int i = 0; i < classIds.size(); i++)
 	{
-	    case 1:imwrite(DirOfDetectedFrame + "Detected"+"Warning1_"+ to_string(DetectedIdx++) + ".jpg", frame);
-			   cout << "Save Detected Frame!" << endl;
-			   break;
-		case 2:imwrite(DirOfDetectedFrame + "Detected"+"Warning2_"+ to_string(DetectedIdx++) + ".jpg", frame);
-			   cout << "Save Detected Frame!" << endl;
-			   break;
-		case 3:imwrite(DirOfDetectedFrame + "Detected"+"Warning3_"+ to_string(DetectedIdx++) + ".jpg", frame);
-			   cout << "Save Detected Frame!" << endl;
-			   break;
+		switch (ProcessClass(classIds, i))
+		{
+		case 1:imwrite(DirOfDetectedFrame + "Detected" + "Warning1_" + to_string(DetectedIdx++) + ".jpg", frame);
+			slot = DInterval;
+			dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, "DetectedWarning1_" + to_string(DetectedIdx) + ".jpg");
+			cout << "Save Detected Frame!" << endl;
+			break;
+		case 2:imwrite(DirOfDetectedFrame + "Detected" + "Warning2_" + to_string(DetectedIdx++) + ".jpg", frame);
+			slot = DInterval;
+			dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, "DetectedWarning2_" + to_string(DetectedIdx) + ".jpg");
+			cout << "Save Detected Frame!" << endl;
+			break;
+		case 3:imwrite(DirOfDetectedFrame + "Detected" + "Warning3_" + to_string(DetectedIdx++) + ".jpg", frame);
+			slot = DInterval;
+			dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, "DetectedWarning3_" + to_string(DetectedIdx) + ".jpg");
+			cout << "Save Detected Frame!" << endl;
+			break;
 		case 0:break;
+		}
 	}
 	
 	cout << "Thread Processing Done!" << endl;
@@ -370,22 +392,20 @@ void ProcessFrame(Mat frame,Net net)
 
 
 //如果检测到违规的目标，返回true
-int ProcessClass(vector<int>& classIds, vector<float>& confidences)
+int ProcessClass(vector<int>& classIds,int classid)
 {   
-	for (int i = 0; i < classIds.size(); i++)
-	{    
-		switch (classIds[i])
-		{
+	   
+	switch (classIds[classid])
+	{
 		  case 0:return 2;  //二级警告
 			     
 		  case 1:return 3;  //三级警告
 			    
 		  case 3:return 1;  //一级警告
 			   
-		  default:return 0; //正常
-			     
-		}	
-	}
+		  default:return 0; //正常			     
+	}	
+	
 	return false;
 }
 
