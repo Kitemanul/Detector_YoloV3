@@ -2,11 +2,11 @@
 #include "db_Operator.h"
 
 
-db_Operator::db_Operator(string dbType,string dbName,string userName,string pwd)
+db_Operator::db_Operator(string dbType,string dbName,string userName,string pwd,string datasource)
 {
 	CoInitialize(NULL);
 	m_pConn.CreateInstance(_uuidof(Connection));
-	strCon = "Provider=SQLOLEDB.1;Persist Security Info=True;User ID="+userName+ ";Password=" +pwd+ ";Initial Catalog="+dbName+";Data Source=(local);Integrated Security=SSPI;";
+	strCon = "Provider=SQLOLEDB.1;Persist Security Info=True;User ID="+userName+ ";Password=" +pwd+ ";Initial Catalog="+dbName+";Data Source="+datasource+";Integrated Security=SSPI;";
 		//strCon = "DSN="+dbType+";server=localhost;database="+dbName;
 	userName = dbName;
 	pwd = pwd;

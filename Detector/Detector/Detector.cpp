@@ -85,6 +85,7 @@ float slot;
 string DB_Name;
 string DB_User;
 string DB_Password;
+string DataSource;
 db_Operator *dbo;
 
 int main(int argc, char** argv)
@@ -104,11 +105,12 @@ int main(int argc, char** argv)
 	Configuration->getCfgByName(Interval, "Interval");  
 	Configuration->getCfgByName(DInterval, "DInterval");
 	//load database cfg
+	Configuration->getCfgByName(DataSource, "DataSource");
 	Configuration->getCfgByName(DB_Name, "DB_Name");
 	Configuration->getCfgByName(DB_User, "DB_User");
 	Configuration->getCfgByName(DB_Password, "DB_Password");
 	//新建数据库操作对象
-	dbo = new db_Operator("sql server", DB_Name, DB_User, DB_Password);
+	dbo = new db_Operator("sql server", DB_Name, DB_User, DB_Password,DataSource);
 	Net net=LoadNetCfg();
 
 	// Open a video file or an image file or a camera stream.	
