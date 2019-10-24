@@ -10,6 +10,7 @@ db_Operator::db_Operator(string dbType,string dbName,string userName,string pwd,
 		//strCon = "DSN="+dbType+";server=localhost;database="+dbName;
 	userName = dbName;
 	pwd = pwd;
+	
 }
 bool db_Operator::db_open()
 {

@@ -91,10 +91,37 @@ yolov3-voc_9000.weights
 
    C:\\Program Files\\Common Files\\System\\ADO\\msado15.dll
 
+   SQLServer2017+SSMS2019
+
 ### 函数改动
 
-​    //是否有违规目标
+ ```
+ //是否有违规目标
 ​    int ProcessClass(vector<int>& classIds, int classid);
+ ```
+
+## V3.1
+
+### 主要改动
+
+1. 更改sqlserver连接字符串
+2. 更改图片命名方式
+
+###  函数改动
+
+   1.增加 get_CurrentTime_s()
+
+## V3.2
+
+### 主要改动
+
+1.修改线程结构
+
+2.修改遍历帧方法（解决长时间播放，无响应问题）
+
+
+
+
 
 
 

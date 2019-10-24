@@ -24,5 +24,6 @@ private:
 	string strCon;
 	string userName;
 	string pwd;
+
 };
 
