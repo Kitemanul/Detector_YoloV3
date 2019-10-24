@@ -30,13 +30,13 @@ using namespace std;
 CfgLoader *Configuration = CfgLoader::instance();
 
 // Initialize the parameters
-float confThreshold=0.6; // Confidence threshold
+float confThreshold=0.8; // Confidence threshold
 float nmsThreshold = 0.4;  // Non-maximum suppression threshold
 int inpWidth = 416;  // Width of network's input image
 int inpHeight = 416; // Height of network's input image
 //互斥锁
 std::mutex DetectedIdx_mutex;
-long long DetectedIdx = 0; //违规图片索引
+
 
 
 vector<string> classes;
@@ -146,11 +146,9 @@ int main(int argc, char** argv)
 		{
 			slot = Interval;
 			i = 0;
-			Mat Processframe = frame.clone();
-			
-			//ProcessFrame(Processframe, net);
+			//Mat Processframe = frame.clone();
 			//开启线程，对Processframe进行处理
-			thread ProcessThread(ProcessFrame, Processframe, net);		
+			thread ProcessThread(ProcessFrame, frame, net);		
 			ProcessThread.detach();					
 		};
 		
@@ -165,7 +163,7 @@ int main(int argc, char** argv)
 	}
 
 	//等待所有线程结束
-	waitKey(3000);
+	waitKey(0);
 	cap.release();
 	if (!parser.has("image")) video.release();
 
@@ -361,25 +359,28 @@ void ProcessFrame(Mat frame,Net net)
 	double t = net.getPerfProfile(layersTimes) / freq;
 	string label = format("Inference time for a frame : %.2f ms", t);
 	putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-
+	string ImageName="";
 	//process class and confidence
 	for (int i = 0; i < classIds.size(); i++)
-	{
+	{  
 		switch (ProcessClass(classIds, i))
 		{
-		case 1:imwrite(DirOfDetectedFrame + "Detected" + "Warning1_" + to_string(DetectedIdx++) + ".jpg", frame);
+		case 1:ImageName = db_Operator::get_CurrentTime_s() + "Warning1" + ".jpg";
+			imwrite(DirOfDetectedFrame + ImageName,frame);
 			slot = DInterval;
-			dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, "DetectedWarning1_" + to_string(DetectedIdx) + ".jpg");
+			dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName);
 			cout << "Save Detected Frame!" << endl;
 			break;
-		case 2:imwrite(DirOfDetectedFrame + "Detected" + "Warning2_" + to_string(DetectedIdx++) + ".jpg", frame);
+		case 2:	ImageName= db_Operator::get_CurrentTime_s() + "Warning2" + ".jpg";
+			imwrite(DirOfDetectedFrame + ImageName, frame);
 			slot = DInterval;
-			dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, "DetectedWarning2_" + to_string(DetectedIdx) + ".jpg");
+			dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName);
 			cout << "Save Detected Frame!" << endl;
 			break;
-		case 3:imwrite(DirOfDetectedFrame + "Detected" + "Warning3_" + to_string(DetectedIdx++) + ".jpg", frame);
+		case 3:ImageName = db_Operator::get_CurrentTime_s() + "Warning3" + ".jpg";
+			imwrite(DirOfDetectedFrame + ImageName , frame);
 			slot = DInterval;
-			dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, "DetectedWarning3_" + to_string(DetectedIdx) + ".jpg");
+			dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame,ImageName);
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 0:break;

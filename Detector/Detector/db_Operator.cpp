@@ -6,7 +6,7 @@ db_Operator::db_Operator(string dbType,string dbName,string userName,string pwd,
 {
 	CoInitialize(NULL);
 	m_pConn.CreateInstance(_uuidof(Connection));
-	strCon = "Provider=SQLOLEDB.1;Persist Security Info=True;User ID="+userName+ ";Password=" +pwd+ ";Initial Catalog="+dbName+";Data Source="+datasource+";Integrated Security=SSPI;";
+	strCon = "Provider=SQLOLEDB.1;Persist Security Info=False;User ID="+userName+ ";Password=" +pwd+ ";Initial Catalog="+dbName+";Data Source="+datasource+";";
 		//strCon = "DSN="+dbType+";server=localhost;database="+dbName;
 	userName = dbName;
 	pwd = pwd;
@@ -20,7 +20,7 @@ bool db_Operator::db_open()
 	}
 	catch (_com_error &e)
 	{
-		cout << e.Description() << endl;
+		cout <<"DataBase Error:"+e.Description() << endl;
 		return false;
 	}
 }
@@ -51,10 +51,8 @@ bool db_Operator::db_Execute(_bstr_t sql)
 		return true;
 	}
 	catch(_com_error &ce)
-	{
-		_bstr_t error;
-		error = ce.Description();
-		cout << error << endl;
+	{		
+		cout <<"将数据插入数据库失败："+ce.Description()<< endl;
 		return false;
 	}
 }
@@ -72,28 +70,48 @@ db_Operator::~db_Operator(void)
 	CoUninitialize(); 
 }
 
-bool db_Operator::db_InsertRecord(float Acurecy,int Alarm_level,string Dir,string ImageName)
+string db_Operator::get_CurrentTime_s()
 {
-	db_open();	
-	_bstr_t CreateSql = "if OBJECT_ID('DetectedRecord') is null create Table DetectedRecord(ID bigint primary key  identity(1, 1) not null,Time datetime null,DirDetectedSave nvarchar(50) null,Alarm_level nchar null,ImageName  nvarchar(50) null,Accurecy nvarchar(50))";
-	db_Execute(CreateSql);
-
 	//时间信息
 	struct tm t;   //tm结构指针
 	time_t now;  //声明time_t类型变量
 	time(&now);      //获取系统日期和时间
 	localtime_s(&t, &now);
 	char s[30];
-	sprintf_s(s, "%d-%02d-%02d %02d:%02d:%02d",
+	sprintf_s(s, "%d-%02d-%02d_%02d-%02d-%02d",
 		t.tm_year + 1900,
 		t.tm_mon + 1,
 		t.tm_mday,
 		t.tm_hour,
 		t.tm_min,
-		t.tm_sec);	
+		t.tm_sec);
+	return string(s);
+}
+ string db_Operator::get_CurrentTime()
+{
+	 //时间信息
+	 struct tm t;   //tm结构指针
+	 time_t now;  //声明time_t类型变量
+	 time(&now);      //获取系统日期和时间
+	 localtime_s(&t, &now);
+	 char s[30];
+	 sprintf_s(s, "%d-%02d-%02d %02d:%02d:%02d",
+		 t.tm_year + 1900,
+		 t.tm_mon + 1,
+		 t.tm_mday,
+		 t.tm_hour,
+		 t.tm_min,
+		 t.tm_sec);
+	 return string(s);
+}
+bool db_Operator::db_InsertRecord(float Acurecy,int Alarm_level,string Dir,string ImageName)
+{
+	db_open();	
+	_bstr_t CreateSql = "if OBJECT_ID('DetectedRecord') is null create Table DetectedRecord(ID bigint primary key  identity(1, 1) not null,Time datetime null,DirDetectedSave nvarchar(50) null,Alarm_level nchar null,ImageName  nvarchar(50) null,Accurecy nvarchar(50))";
+	db_Execute(CreateSql);
     //组成sql语句
-	_bstr_t sql = "insert into dbo.DetectedRecord(Time,DirDetectedSave,Alarm_level,ImageName,Accurecy) values('" + _bstr_t(s) + "','" + _bstr_t(Dir.c_str()) + "','" + _bstr_t(Alarm_level)+"','" + _bstr_t(ImageName.c_str()) + "','" + _bstr_t(Acurecy) + "')";
+	_bstr_t sql = "insert into dbo.DetectedRecord(Time,DirDetectedSave,Alarm_level,ImageName,Accurecy) values('" + _bstr_t(db_Operator::get_CurrentTime().c_str()) + "','" + _bstr_t(Dir.c_str()) + "','" + _bstr_t(Alarm_level)+"','" + _bstr_t(ImageName.c_str()) + "','" + _bstr_t(Acurecy) + "')";
 	db_Execute(sql);
-	db_close();
+	db_close();	
 	return true;
 }
