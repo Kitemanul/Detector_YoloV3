@@ -31,17 +31,16 @@ using namespace std;
 CfgLoader *Configuration = CfgLoader::instance();
 
 // Initialize the parameters
-float confThreshold=0.9; // Confidence threshold
+float confThreshold; // Confidence threshold
 float nmsThreshold = 0.4;  // Non-maximum suppression threshold
 int inpWidth = 416;  // Width of network's input image
 int inpHeight = 416; // Height of network's input image
 //互斥锁
 std::mutex Thread_mutex;
 
-
-
 vector<string> classes;
 deque<Mat> Buffer;
+deque<string> Imagename;
 
 //Load net Configuration
 Net LoadNetCfg();
@@ -110,6 +109,7 @@ int main(int argc, char** argv)
 	Configuration->getCfgByName(DB_Name, "DB_Name");
 	Configuration->getCfgByName(DB_User, "DB_User");
 	Configuration->getCfgByName(DB_Password, "DB_Password");
+	Configuration->getCfgByName(confThreshold, "Threshold");
 
 	// Open a video file or an image file or a camera stream.	
 	VideoCapture cap=OpenInputFile(parser);
@@ -135,10 +135,11 @@ int main(int argc, char** argv)
 				Thread_mutex.lock();
 				slot = Interval;
 				Buffer.push_back(frame);
+				Imagename.push_back(db_Operator::get_CurrentTime_s());
 				Thread_mutex.unlock();
 			};											
 			imshow(kWinName, frame);
-			waitKey(2);
+			waitKey(40);
 			i++;
 		}
 		else if (!cap.read(frame))
@@ -151,6 +152,7 @@ int main(int argc, char** argv)
 		}
 	}
 	//等待所有线程结束
+	destroyWindow(kWinName);
 	Thread.join();
 	cap.release();
 	return 0;
@@ -327,73 +329,78 @@ void ThreadProcessFrame()
 	// Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
 	vector<double> layersTimes;
 	Mat frame;
+	Mat Frame;
 	double freq = getTickFrequency() / 1000;;
 	double t;	
 	string label;
-	string ImageName = "";
+	string ImageName ;
 	int flag=0;
 	while (1)
 	{
 		Thread_mutex.lock();
 		if (!Buffer.empty())
 		{
+		   flag = 0;
            frame = Buffer.front();
+		   ImageName = Imagename.front();
 		   Buffer.pop_front();
-		   Thread_mutex.unlock();
-
+		   Imagename.pop_front();
+		}	
+		else
+		{
+			frame =NULL;
+			flag++;
+		}
+		Thread_mutex.unlock();
+		if (!frame.empty())
+		{  
+		   blob = NULL;
+		   classIds.clear();
+		   confidences.clear();
+		   outs.clear();
+		   net.setInput(NULL);
 		   // Create a 4D blob from a frame.
 		   blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
 		   //Sets the input to the network
 		   net.setInput(blob);
 		   // Runs the forward pass to get output of the output layers	
 		   net.forward(outs, getOutputsNames(net));
-		   // Remove the bounding boxes with low confidence
-		   classIds.clear();
-		   confidences.clear();
+		   // Remove the bounding boxes with low confidence	   
 		   postprocess(frame, outs, classIds, confidences);
 		   t = net.getPerfProfile(layersTimes) / freq;
 		   label = format("Inference time for a frame : %.2f ms", t);
-		   putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-
+		   putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));		  
+		   Frame = frame.clone();		
 		   //process class and confidence
 		   for (int i = 0; i < classIds.size(); i++)
 		   {
 			   switch (ProcessClass(classIds, i))
 			   {
-			   case 1:ImageName = db_Operator::get_CurrentTime_s() + "Warning1" + ".jpg";
-				   imwrite(DirOfDetectedFrame + ImageName, frame);
-				   dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName);
-				   Thread_mutex.lock();
+			   case 1:
+				   imwrite(DirOfDetectedFrame + ImageName + "Warning1" + "_" + to_string(i) + ".jpg", Frame);
+				   dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName + "Warning1" + "_" + to_string(i) + ".jpg");
 				   slot = DInterval;
 				   cout << "Save Detected Frame!" << endl;
-				   Thread_mutex.unlock();
 				   break;
-			   case 2:	ImageName = db_Operator::get_CurrentTime_s() + "Warning2" + ".jpg";
-				   imwrite(DirOfDetectedFrame + ImageName, frame);
-				   dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName);
-				   Thread_mutex.lock();
+			   case 2:
+				   imwrite(DirOfDetectedFrame + ImageName + "Warning2" + "_" + to_string(i) + ".jpg", Frame);
+				   dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName + "Warning2" + "_" + to_string(i) + ".jpg");
 				   slot = DInterval;
 				   cout << "Save Detected Frame!" << endl;
-				   Thread_mutex.unlock();
 				   break;
-			   case 3:ImageName = db_Operator::get_CurrentTime_s() + "Warning3" + ".jpg";
-				   imwrite(DirOfDetectedFrame + ImageName, frame);
-				   dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, ImageName);
-				   Thread_mutex.lock();
+			   case 3:
+				   imwrite(DirOfDetectedFrame + ImageName + "Warning3" + "_" + to_string(i) + ".jpg", Frame);
+				   dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, ImageName + "Warning3" + "_" + to_string(i) + ".jpg");
 				   slot = DInterval;
 				   cout << "Save Detected Frame!" << endl;
-				   Thread_mutex.unlock();
 				   break;
 			   case 0:break;
 			   }
 		   }
+		
 		}
-		else
-		{
-           Thread_mutex.unlock();
-		   flag++;
-		}
-		if (flag == 5)
+		
+		if (flag == 10)
 		{
 			break;
 		}

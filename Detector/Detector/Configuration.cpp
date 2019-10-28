@@ -1,6 +1,7 @@
 
 #include "pch.h"
 #include <fstream>
+#include <sstream>
 #include "Configuration.h"
 
 static std::string& trim(std::string& s)
@@ -218,7 +219,7 @@ int CfgLoader::getCfgByName(float& value, std::string const & name, int segment)
 	{
 		return -1;
 	}
-	int num = 0;
+	/*int num = 0;
 	int c = 0;
 	int flag = 1;
 	for (int i = 0; i < s.length(); ++i)
@@ -231,7 +232,7 @@ int CfgLoader::getCfgByName(float& value, std::string const & name, int segment)
 		}
 		if (c == '.')
 		{
-			break;
+			continue;
 		}
 		c -= '0';
 		if (c >= 0 && c <= 9)
@@ -243,8 +244,9 @@ int CfgLoader::getCfgByName(float& value, std::string const & name, int segment)
 		{
 			return -1;
 		}
-	}
-	value = num * flag;
+	}*/
+	/*value = num * flag;*/
+	value = atof(s.c_str());
 	return 0;
 }
 
