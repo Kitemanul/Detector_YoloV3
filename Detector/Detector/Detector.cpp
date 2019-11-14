@@ -1,6 +1,5 @@
 // This code is written at BigVision LLC. It is based on the OpenCV project.
 //It is subject to the license terms in the LICENSE file found in this distribution and at http://opencv.org/license.html
-//fgagasgsagasgffffffffffff
 // Usage example:  ./object_detection_yolo.out --video=run.mp4
 //                 ./object_detection_yolo.out --image=bird.jpg
 
@@ -59,8 +58,8 @@ void drawPred(int classId, float conf, int left, int top, int right, int bottom,
 vector<String> getOutputsNames(const Net& net);
 
 //Process frame
-void ThreadProcessFrame();
-void ProcessFrame(Mat frame, Net net,string ImageName);
+void ThreadProcessFrame(Mat &frame);
+void ProcessFrame(Mat &frame, Net net);
 
 //Peocess Class 
 //如果检测到违规的目标，截图
@@ -85,11 +84,6 @@ float DInterval;
 float slot;
 
 //数据库配置
-string DB_Name;
-string DB_User;
-string DB_Password;
-string DataSource;
-db_Operator *dbo;
 
 int main(int argc, char** argv)
 {
@@ -107,10 +101,6 @@ int main(int argc, char** argv)
 	Configuration->getCfgByName(Interval, "Interval");  
 	Configuration->getCfgByName(DInterval, "DInterval");
 	//load database cfg
-	Configuration->getCfgByName(DataSource, "DataSource");
-	Configuration->getCfgByName(DB_Name, "DB_Name");
-	Configuration->getCfgByName(DB_User, "DB_User");
-	Configuration->getCfgByName(DB_Password, "DB_Password");
 	Configuration->getCfgByName(confThreshold, "Threshold");
 
 	// Open a video file or an image file or a camera stream.	
@@ -125,27 +115,20 @@ int main(int argc, char** argv)
 	int i = 0;
 	int flag=0;
 	// Process frames.
-	thread Thread(ThreadProcessFrame);
-	Thread.detach();
+	VideoWriter writer;
+	Size size = Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FRAME_HEIGHT));
+	writer.open("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), 10, size, true);
 
 	for(;;)
 	{    
 		
 		if (cap.read(frame))
 		{
-			if (i == slot || i == 0)
-			{   
-				Mat Frame=frame.clone();
-				i = 0;
-				Thread_mutex.lock();
-				slot = Interval;
-				Buffer.push_back(Frame);
-				Imagename.push_back(db_Operator::get_CurrentTime_s());
-				Thread_mutex.unlock();
-				
-			};											
+			Mat Frame = frame.clone();
+			ThreadProcessFrame(frame);
+			waitKey(1);
 			imshow(kWinName, frame);
-			waitKey(30);
+			writer.write(frame);			
 			i++;
 		}
 		else if (!cap.read(frame))
@@ -321,53 +304,19 @@ vector<String> getOutputsNames(const Net& net)
 }
 
 //帧处理线程
-void ThreadProcessFrame()
+void ThreadProcessFrame(Mat &frame)
 {   
 	
 	Configuration->getCfgByName(pro_dir, "NNCfg_Dir");  //get神经网络配置文件目录
 	//新建数据库操作对象
-	dbo = new db_Operator("sql server", DB_Name, DB_User, DB_Password, DataSource);
 	Net net = LoadNetCfg();
 	// Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
 	
-	Mat frame;
-	Mat Frame;
+	ProcessFrame(frame, net);
 
-	string ImageName ;
-	int flag=0;
-	while (1)
-	{
-		Thread_mutex.lock();
-		if (!Buffer.empty())
-		{
-		   flag = 0;
-           frame = Buffer.front();
-		   ImageName = Imagename.front();
-		   Buffer.pop_front();
-		   Imagename.pop_front();
-		}	
-		else
-		{
-			frame =NULL;
-			flag++;
-		}
-		Thread_mutex.unlock();
-		if (!frame.empty())
-		{   
-			
-			ProcessFrame(frame, net, ImageName);	
-		
-		}
-		
-		if (flag == 10)
-		{
-			break;
-		}
-		
-	}
 }
 
-void ProcessFrame(Mat frame, Net net,string ImageName)
+void ProcessFrame(Mat &frame,Net net)
 {   
 	vector<Mat> outs;
 	Mat blob;
@@ -379,6 +328,8 @@ void ProcessFrame(Mat frame, Net net,string ImageName)
 	string label;
 	double freq = getTickFrequency() / 1000;;
 	double t;
+	Configuration->getCfgByName(pro_dir, "NNCfg_Dir");  //get神经网络配置文件目录
+
 
 	// Create a 4D blob from a frame.
 	blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
@@ -398,21 +349,15 @@ void ProcessFrame(Mat frame, Net net,string ImageName)
 		switch (ProcessClass(classIds, i))
 		{
 		case 1:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning1" + "_" + to_string(i) + ".jpg", Frame);
-			dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName + "Warning1" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
+			imwrite(DirOfDetectedFrame + "Warning1" + "_" + to_string(i) + ".jpg", Frame);						
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 2:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning2" + "_" + to_string(i) + ".jpg", Frame);
-			dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName + "Warning2" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
+			imwrite(DirOfDetectedFrame  + "Warning2" + "_" + to_string(i) + ".jpg", Frame);			
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 3:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning3" + "_" + to_string(i) + ".jpg", Frame);
-			dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, ImageName + "Warning3" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
+			imwrite(DirOfDetectedFrame  + "Warning3" + "_" + to_string(i) + ".jpg", Frame);
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 0:break;
