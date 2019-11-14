@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 				
 			};											
 			imshow(kWinName, frame);
-			waitKey(42);
+			waitKey(30);
 			i++;
 		}
 		else if (!cap.read(frame))
@@ -176,7 +176,7 @@ Net LoadNetCfg()
 
 	// Give the configuration and weight files for the model
 	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
-	String modelWeights = pro_dir + "yolov3-voc_9000.weights";
+	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
 
 	// Load the network
 	Net net = readNetFromDarknet(modelConfiguration, modelWeights);
@@ -426,11 +426,11 @@ int ProcessClass(vector<int>& classIds,int classid)
 	   
 	switch (classIds[classid])
 	{
-		  case 0:return 2;  //二级警告
+		  case 0:return 1;  //一级警告
 			     
-		  case 1:return 3;  //三级警告
+		  case 1:return 2;  //二级警告
 			    
-		  case 3:return 1;  //一级警告
+		  case 2:return 3;  //三级警告
 			   
 		  default:return 0; //正常			     
 	}	
