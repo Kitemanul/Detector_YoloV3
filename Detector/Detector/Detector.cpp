@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 	// Process frames.
 	VideoWriter writer;
 	Size size = Size(cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FRAME_HEIGHT));
-	writer.open("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), 10, size, true);
+	writer.open("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), cap.get(CV_CAP_PROP_FPS), size, true);
 
 	for(;;)
 	{    
