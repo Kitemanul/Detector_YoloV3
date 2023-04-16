@@ -24,9 +24,6 @@
     <ClInclude Include="db_Operator.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ProcessFrame.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -39,9 +36,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="db_Operator.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ProcessFrame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
