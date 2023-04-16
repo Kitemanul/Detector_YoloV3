@@ -1,15 +1,19 @@
 #pragma once
-
-#include <string>
+#include "pch.h"
+#include <fstream>
+#include <sstream>
 #include <iostream>
+#include <thread>
+#include <deque>
+#include <mutex>
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
-#include <iostream>
 #include "Configuration.h"
 #include "db_Operator.h"
-#include <mutex>
-#include <deque>
+#include "ProcessFrame.h"
+#include "Detector.h"
+
 using namespace std;
 using namespace cv;
 using namespace dnn;

@@ -27,6 +27,9 @@
     <ClInclude Include="ProcessFrame.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Detector.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

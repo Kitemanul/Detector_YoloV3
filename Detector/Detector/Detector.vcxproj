@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="db_Operator.h" />
+    <ClInclude Include="Detector.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessFrame.h" />
   </ItemGroup>

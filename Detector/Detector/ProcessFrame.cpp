@@ -1,4 +1,4 @@
-// Remove the bounding boxes with low confidence using non-maxima suppression
+
 #include "ProcessFrame.h"
 #include "pch.h"
 
