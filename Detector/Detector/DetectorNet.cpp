@@ -3,7 +3,7 @@
 
 
 DetectorNet::DetectorNet()
-{
+{   
 	loadConfig();
 	// Load the network
 	yolov3Net = dnn::readNetFromDarknet(modelConfiguration, modelWeights);
@@ -25,7 +25,7 @@ void DetectorNet::loadConfig()
 
 }
 
-void DetectorNet::process(Mat &frame)
+void DetectorNet::compute(Mat &frame)
 {	
 	curFrame = frame;
 	// Create a 4D blob from a frame.
@@ -34,10 +34,8 @@ void DetectorNet::process(Mat &frame)
 	yolov3Net.setInput(blob);
 	// Runs the forward pass to get output of the output layers	
 	yolov3Net.forward(outs, getOutputsNames());
-}
 
-void DetectorNet::postProcess()
-{
+	postProcess();
 }
 
 // Get the names of the output layers
@@ -89,26 +87,49 @@ void DetectorNet::postProcess() {
 			}
 		}
 	}
-
-	// Draw the predicted bounding box
-	void DetectorNet::drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat& frame)
+	// Perform non maximum suppression to eliminate redundant overlapping boxes with
+    // lower confidences
+	vector<int> indices;
+	dnn::NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
+	for (size_t i = 0; i < indices.size(); ++i)
 	{
-		//Draw a rectangle displaying the bounding box
-		rectangle(frame, Point(left, top), Point(right, bottom), Scalar(255, 178, 50), 3);
-
-		//Get the label for the class name and its confidence
-		string label = format("%.2f", conf);
-		if (!classes.empty())
-		{
-			CV_Assert(classId < (int)classes.size());
-			label = classes[classId] + ":" + label;
-		}
-
-		//Display the label at the top of the bounding box
-		int baseLine;
-		Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-		top = max(top, labelSize.height);
-		rectangle(frame, Point(left, top - round(1.5*labelSize.height)), Point(left + round(1.5*labelSize.width), top + baseLine), Scalar(255, 255, 255), FILLED);
-		putText(frame, label, Point(left, top), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 0, 0), 1);
+		int idx = indices[i];
+		Rect box = boxes[idx];
+		drawPred(classIds[idx], confidences[idx], box.x, box.y,
+			box.x + box.width, box.y + box.height, curFrame);
 	}
 }
+vector<int> DetectorNet::getClassIds()
+{
+	return classIds;
+}
+vector<float> DetectorNet::getConfidences()
+{
+	return confidences;
+}
+vector<double> DetectorNet::getLayersTimes()
+{
+	return layersTimes;
+}
+// Draw the predicted bounding box
+void DetectorNet::drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat& frame)
+{
+	//Draw a rectangle displaying the bounding box
+	rectangle(frame, Point(left, top), Point(right, bottom), Scalar(255, 178, 50), 3);
+
+	//Get the label for the class name and its confidence
+	string label = format("%.2f", conf);
+	if (!classes.empty())
+	{
+		CV_Assert(classId < (int)classes.size());
+		label = classes[classId] + ":" + label;
+	}
+
+	//Display the label at the top of the bounding box
+	int baseLine;
+	Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+	top = max(top, labelSize.height);
+	rectangle(frame, Point(left, top - round(1.5*labelSize.height)), Point(left + round(1.5*labelSize.width), top + baseLine), Scalar(255, 255, 255), FILLED);
+	putText(frame, label, Point(left, top), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0, 0, 0), 1);
+}
+

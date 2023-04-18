@@ -13,39 +13,44 @@
 #include "db_Operator.h"
 #include "ProcessFrame.h"
 #include "Detector.h"
+#include "DetectorNet.h"
 
 using namespace std;
 using namespace cv;
 using namespace dnn;
 
-extern float confThreshold;
-extern float confThreshold; // Confidence threshold
-extern float nmsThreshold;  // Non-maximum suppression threshold
-extern int inpWidth;  // Width of network's input image
-extern int inpHeight;
-extern vector<string> classes;
-extern string pro_dir;
-extern CfgLoader *Configuration;
-extern string DB_Name;
-extern string DB_User;
-extern string DB_Password;
-extern string DataSource;
-extern db_Operator *dbo;
-extern mutex Thread_mutex;
-extern string DirOfDetectedFrame;
-//视频流帧率
-extern float FPS;
-//两次检测之间间隔时间
-extern float Interval;
-//成功检测到目标后，下一次检测间隔时间
-extern float DInterval;
-extern float slot;
+//extern float confThreshold;
+//extern float confThreshold; // Confidence threshold
+//extern float nmsThreshold;  // Non-maximum suppression threshold
+//extern int inpWidth;  // Width of network's input image
+//extern int inpHeight;
+//extern vector<string> classes;
+//extern string pro_dir;
+//extern CfgLoader *Configuration;
+//extern string DB_Name;
+//extern string DB_User;
+//extern string DB_Password;
+//extern string DataSource;
+//extern db_Operator *dbo;
+//extern mutex Thread_mutex;
+//extern string DirOfDetectedFrame;
+////视频流帧率
+//extern float FPS;
+////两次检测之间间隔时间
+//extern float Interval;
+////成功检测到目标后，下一次检测间隔时间
+//extern float DInterval;
+//extern float slot;
 
 extern deque<Mat> Buffer;
 extern deque<string> Imagename;
 
+string ImageName;
+
 class ProcessFrame {
 public:
+
+	ProcessFrame();
 	
 	void postprocess(Mat& frame, const vector<Mat>& outs, vector<int>& classIds, vector<float>& confidences);
 	
@@ -55,7 +60,7 @@ public:
 
 	void ThreadProcessFrame();
 
-	void Process(Mat frame, Net net, string ImageName);
+	void Process(Mat frame, string ImageName);
 
 	Net LoadNetCfg();
 

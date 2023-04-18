@@ -51,16 +51,22 @@ private:
 
 	vector<String> getOutputsNames();
 
-	//画4框
+	//画框
 	void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat & frame);
 
 public:
 	//初始化
 	DetectorNet();
 	//计算结果
-	void process(Mat &frame);
+	void compute(Mat &frame);
 	//后处理
 	void postProcess();
+	//获取标签
+	vector<int> getClassIds();
+	//获取置信度
+	vector<float> getConfidences();
+	//获取处理时间
+	vector<double> getLayersTimes();
 
 
 
