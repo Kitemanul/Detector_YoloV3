@@ -19,6 +19,30 @@ mutex Thread_mutex;
 deque<Mat> Buffer;
 deque<string> Imagename;
 
+
+//Load Configuration
+CfgLoader *Configuration = CfgLoader::instance();
+
+
+
+//违规截图存储路径，默认项目根目录
+string DirOfDetectedFrame = "";
+
+//视频流帧率
+float FPS;
+//两次检测之间间隔时间
+float Interval;
+//成功检测到目标后，下一次检测间隔时间
+float DInterval;
+float slot;
+
+//数据库配置
+string DB_Name;
+string DB_User;
+string DB_Password;
+string DataSource;
+db_Operator *dbo;
+
 int main(int argc, char** argv)
 {	
 	CommandLineParser parser(argc, argv, keys);
@@ -49,10 +73,10 @@ int main(int argc, char** argv)
 	//两次检测之间间隔帧数,默认每秒处理一帧
 	int i = 0;
 	int flag=0;
-	// Process frames.
-	ProcessFrame threadProcessFrame;
-	thread Thread(threadProcessFrame.ThreadProcessFrame());
-	Thread.detach();
+	//// Process frames.
+	//ProcessFrame threadProcessFrame;
+	//thread Thread();
+	//Thread.detach();
 
 	for(;;)
 	{    		

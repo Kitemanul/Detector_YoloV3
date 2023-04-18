@@ -13,6 +13,7 @@ DetectorNet::DetectorNet()
 
 void DetectorNet::loadConfig()
 {
+	cfgReader == CfgLoader::instance();
 	//Load Cfg
 	cfgReader.init("Configuration.cfg");
 	cfgReader.getCfgByName(confThreshold, "Threshold");

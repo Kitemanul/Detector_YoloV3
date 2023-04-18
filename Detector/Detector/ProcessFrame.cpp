@@ -3,11 +3,6 @@
 #include "pch.h"
 
 
-ProcessFrame::ProcessFrame()
-{
-	
-}
-
 //帧处理线程
 void ProcessFrame::ThreadProcessFrame()
 {

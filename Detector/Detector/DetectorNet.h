@@ -8,7 +8,7 @@
 #include "Configuration.h"
 
 using namespace std;
-using namespace dnn;
+//using namespace dnn;
 using namespace cv;
 
 class DetectorNet
@@ -17,7 +17,7 @@ private:
 	//当前帧
 	Mat curFrame;
 	//使用的神经网络
-	Net yolov3Net;
+	dnn::Net yolov3Net;
 	Mat blob;
 	//目标识别的类别 00 01 10 11
 	vector<string> classes;
@@ -36,8 +36,6 @@ private:
 	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
 	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
 	
-	//载入神经网络的配置文件
-	void loadConfig();
 	//读取配置类
 	CfgLoader cfgReader;
 
@@ -55,6 +53,7 @@ private:
 	void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat & frame);
 
 public:
+
 	//初始化
 	DetectorNet();
 	//计算结果
