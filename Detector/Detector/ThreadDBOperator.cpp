@@ -3,5 +3,5 @@
 
 ThreadDBOperator::ThreadDBOperator()
 {
-	op=
+	
 }

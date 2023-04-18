@@ -8,7 +8,6 @@
 #include "Configuration.h"
 
 using namespace std;
-//using namespace dnn;
 using namespace cv;
 
 class DetectorNet
@@ -37,7 +36,7 @@ private:
 	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
 	
 	//读取配置类
-	CfgLoader cfgReader;
+	CfgLoader* cfgReader;
 
 	// 参数初始化
 	float confThreshold; // Confidence threshold
@@ -54,7 +53,8 @@ private:
 
 public:
 
-	//初始化
+	void loadConfig();
+	//构造函数
 	DetectorNet();
 	//计算结果
 	void compute(Mat &frame);

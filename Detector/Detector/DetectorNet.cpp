@@ -1,23 +1,24 @@
 #include "pch.h"
 #include "DetectorNet.h"
 
+using namespace dnn;
 
 DetectorNet::DetectorNet()
 {   
 	loadConfig();
 	// Load the network
-	yolov3Net = dnn::readNetFromDarknet(modelConfiguration, modelWeights);
-	yolov3Net.setPreferableBackend(dnn::DNN_BACKEND_OPENCV);
-	yolov3Net.setPreferableTarget(dnn::DNN_TARGET_CPU);
+	yolov3Net = readNetFromDarknet(modelConfiguration, modelWeights);
+	yolov3Net.setPreferableBackend(DNN_BACKEND_OPENCV);
+	yolov3Net.setPreferableTarget(DNN_TARGET_CPU);
 }
 
 void DetectorNet::loadConfig()
 {
-	cfgReader == CfgLoader::instance();
+	cfgReader = CfgLoader::instance();
 	//Load Cfg
-	cfgReader.init("Configuration.cfg");
-	cfgReader.getCfgByName(confThreshold, "Threshold");
-	cfgReader.getCfgByName(pro_dir, "NNCfg_Dir");
+	cfgReader->init("Configuration.cfg");
+	cfgReader->getCfgByName(confThreshold, "Threshold");
+	cfgReader->getCfgByName(pro_dir, "NNCfg_Dir");
 	// Load names of classes 00 01 10 11
 	string classesFile = pro_dir + "voc.names";
 	ifstream ifs(classesFile.c_str());

@@ -1,36 +1,60 @@
 
 #include "ProcessFrame.h"
 #include "pch.h"
+#include <opencv2/dnn.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include "Detector.h"
 
+using namespace cv;
+using namespace std;
+
+ProcessFrame::ProcessFrame()
+{
+	cfgReadeer = CfgLoader::instance();
+
+
+	cfgReadeer->getCfgByName(DirOfDetectedFrame, "DetectedFrameDir");//get违规图片保存目录
+	cfgReadeer->getCfgByName(Interval, "Interval");
+	cfgReadeer->getCfgByName(DInterval, "DInterval");
+	//load database cfg
+	cfgReadeer->getCfgByName(DataSource, "DataSource");
+	cfgReadeer->getCfgByName(DB_Name, "DB_Name");
+	cfgReadeer->getCfgByName(DB_User, "DB_User");
+	cfgReadeer->getCfgByName(DB_Password, "DB_Password");
+
+}
 
 //帧处理线程
 void ProcessFrame::ThreadProcessFrame()
 {
 	Mat curFrame;
 	int flag = 0;
-	while (1){
+	string imageName;
+	while (1) {
 		Thread_mutex.lock();
-		if (!Buffer.empty()){
+		if (!Buffer.empty()) {
 			flag = 0;
 			curFrame = Buffer.front();
-			ImageName = Imagename.front();
+			imageName = ImageName.front();
 			Buffer.pop_front();
-			Imagename.pop_front();
-		}else{
+			ImageName.pop_front();
+		}
+		else {
 			curFrame = NULL;
 			flag++;
 		}
 		Thread_mutex.unlock();
-		if (!curFrame.empty()){
-			Process(curFrame,ImageName);
+		if (!curFrame.empty()) {
+			Process(curFrame, imageName);
 		}
-		if (flag == 10){
+		if (flag == 10) {
 			break;
 		}
 	}
 }
 
-void ProcessFrame::Process(Mat frame, string ImageName)
+void ProcessFrame::Process(Mat frame, string imageName)
 {
 	////新建数据库操作对象
 	db_Operator dbo("sql server", DB_Name, DB_User, DB_Password, DataSource);
@@ -48,25 +72,25 @@ void ProcessFrame::Process(Mat frame, string ImageName)
 	vector<float> confidences=net.getConfidences();
 	vector<double> layersTimes=net.getLayersTimes();
 
-	for (int i = 0; i < net.getClassIds.size(); i++)
+	for (int i = 0; i < classIds.size(); i++)
 	{
 		switch (ProcessClass(classIds, i))
 		{
 		case 1:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning1" + "_" + to_string(i) + ".jpg", frame);
-			dbo.db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName + "Warning1" + "_" + to_string(i) + ".jpg");
+			imwrite(DirOfDetectedFrame + imageName + "Warning1" + "_" + to_string(i) + ".jpg", frame);
+			dbo.db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, imageName + "Warning1" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 2:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning2" + "_" + to_string(i) + ".jpg", frame);
-			dbo.db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName + "Warning2" + "_" + to_string(i) + ".jpg");
+			imwrite(DirOfDetectedFrame + imageName + "Warning2" + "_" + to_string(i) + ".jpg", frame);
+			dbo.db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, imageName + "Warning2" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 3:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning3" + "_" + to_string(i) + ".jpg", frame);
-			dbo.db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, ImageName + "Warning3" + "_" + to_string(i) + ".jpg");
+			imwrite(DirOfDetectedFrame + imageName + "Warning3" + "_" + to_string(i) + ".jpg", frame);
+			dbo.db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, imageName + "Warning3" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;

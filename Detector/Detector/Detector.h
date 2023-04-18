@@ -21,7 +21,10 @@ using namespace std;
 extern std::mutex Thread_mutex;
 //队列1
 extern deque<Mat> Buffer;
-extern deque<string> Imagename;
+extern deque<string> ImageName;
 
 // Load InputFile
 VideoCapture OpenInputFile(CommandLineParser parser);
+
+////线程调用函数 处理视频帧
+void ThreadProcessFrame();

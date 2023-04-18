@@ -17,24 +17,14 @@ const char* keys =
 mutex Thread_mutex;
 //队列1
 deque<Mat> Buffer;
-deque<string> Imagename;
+deque<string> ImageName;
 
 
 //Load Configuration
 CfgLoader *Configuration = CfgLoader::instance();
 
-
-
 //违规截图存储路径，默认项目根目录
 string DirOfDetectedFrame = "";
-
-//视频流帧率
-float FPS;
-//两次检测之间间隔时间
-float Interval;
-//成功检测到目标后，下一次检测间隔时间
-float DInterval;
-float slot;
 
 //数据库配置
 string DB_Name;
@@ -53,14 +43,6 @@ int main(int argc, char** argv)
 	}
 	//Load Cfg
 	Configuration->init("Configuration.cfg");
-	Configuration->getCfgByName(DirOfDetectedFrame, "DetectedFrameDir");//get违规图片保存目录
-	Configuration->getCfgByName(Interval, "Interval");  
-	Configuration->getCfgByName(DInterval, "DInterval");
-	//load database cfg
-	Configuration->getCfgByName(DataSource, "DataSource");
-	Configuration->getCfgByName(DB_Name, "DB_Name");
-	Configuration->getCfgByName(DB_User, "DB_User");
-	Configuration->getCfgByName(DB_Password, "DB_Password");
 
 	// Open a video file or an image file or a camera stream.	
 	VideoCapture cap=OpenInputFile(parser);
@@ -73,10 +55,11 @@ int main(int argc, char** argv)
 	//两次检测之间间隔帧数,默认每秒处理一帧
 	int i = 0;
 	int flag=0;
+	int slot=10;
+
 	//// Process frames.
-	//ProcessFrame threadProcessFrame;
-	//thread Thread();
-	//Thread.detach();
+	thread Thread(ThreadProcessFrame);
+	Thread.detach();
 
 	for(;;)
 	{    		
@@ -89,7 +72,7 @@ int main(int argc, char** argv)
 				Thread_mutex.lock();
 				slot = Interval;
 				Buffer.push_back(Frame);
-				Imagename.push_back(db_Operator::get_CurrentTime_s());
+				ImageName.push_back(db_Operator::get_CurrentTime_s());
 				Thread_mutex.unlock();
 				
 			};											
@@ -153,7 +136,11 @@ VideoCapture OpenInputFile(CommandLineParser parser)
 	return cap;
 }
 
-
+//线程调用函数
+void ThreadProcessFrame() {
+	ProcessFrame threadProcessFrame;
+	threadProcessFrame.ThreadProcessFrame();
+}
 
 
 
