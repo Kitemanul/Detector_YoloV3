@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 				
 			};											
 			imshow(kWinName, frame);
-			waitKey(30);
+			waitKey(42);
 			i++;
 		}
 		else if (!cap.read(frame))
@@ -367,50 +367,33 @@ void ThreadProcessFrame()
 	}
 }
 
+void netProcess(Mat &frame, Net net, vector<int> classIds, vector<float> confidences);
+
 void ProcessFrame(Mat frame, Net net,string ImageName)
 {   
-	vector<Mat> outs;
-	Mat blob;
-	Mat Frame;
 	//检测到的标签及置信度
 	vector<int> classIds;
 	vector<float> confidences;
-	vector<double> layersTimes;
-	string label;
-	double freq = getTickFrequency() / 1000;;
-	double t;
-
-	// Create a 4D blob from a frame.
-	blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
-	//Sets the input to the network
-	net.setInput(blob);
-	// Runs the forward pass to get output of the output layers	
-	net.forward(outs, getOutputsNames(net));
-	// Remove the bounding boxes with low confidence	   
-	postprocess(frame, outs, classIds, confidences);
-	t = net.getPerfProfile(layersTimes) / freq;
-	label = format("Inference time for a frame : %.2f ms", t);
-	putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-	Frame = frame.clone();
+	netProcess(frame,net, classIds, confidences);
 	//process class and confidence
 	for (int i = 0; i < classIds.size(); i++)
 	{
 		switch (ProcessClass(classIds, i))
 		{
 		case 1:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning1" + "_" + to_string(i) + ".jpg", Frame);
+			imwrite(DirOfDetectedFrame + ImageName + "Warning1" + "_" + to_string(i) + ".jpg", frame);
 			dbo->db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, ImageName + "Warning1" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 2:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning2" + "_" + to_string(i) + ".jpg", Frame);
+			imwrite(DirOfDetectedFrame + ImageName + "Warning2" + "_" + to_string(i) + ".jpg", frame);
 			dbo->db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, ImageName + "Warning2" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 3:
-			imwrite(DirOfDetectedFrame + ImageName + "Warning3" + "_" + to_string(i) + ".jpg", Frame);
+			imwrite(DirOfDetectedFrame + ImageName + "Warning3" + "_" + to_string(i) + ".jpg", frame);
 			dbo->db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, ImageName + "Warning3" + "_" + to_string(i) + ".jpg");
 			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
@@ -420,17 +403,48 @@ void ProcessFrame(Mat frame, Net net,string ImageName)
 	}
 }
 
+void compute(Mat &frame, Net net, Mat &blob, vector<Mat> &outs) {
+
+	// Create a 4D blob from a frame.
+	
+	//Sets the input to the network
+	net.setInput(blob);
+	// Runs the forward pass to get output of the output layers	
+	net.forward(outs, getOutputsNames(net));
+	
+}
+
+void netProcess(Mat &frame, Net net, vector<int> classIds, vector<float> confidences) {
+	vector<Mat> outs;
+	vector<double> layersTimes;
+	string label;
+	Mat blob;
+
+	double freq = getTickFrequency() / 1000;;
+	double t;
+
+	blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
+	compute(frame,net,blob,outs);
+	// Remove the bounding boxes with low confidence	   
+	postprocess(frame, outs, classIds, confidences);
+	t = net.getPerfProfile(layersTimes) / freq;
+	label = format("Inference time for a frame : %.2f ms", t);
+	putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+	
+
+}
+
 //如果检测到违规的目标，返回true
 int ProcessClass(vector<int>& classIds,int classid)
 {   
 	   
 	switch (classIds[classid])
 	{
-		  case 0:return 1;  //一级警告
+		  case 0:return 2;  //二级警告
 			     
-		  case 1:return 2;  //二级警告
+		  case 1:return 3;  //三级警告
 			    
-		  case 2:return 3;  //三级警告
+		  case 3:return 1;  //一级警告
 			   
 		  default:return 0; //正常			     
 	}	
