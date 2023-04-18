@@ -7,7 +7,8 @@ void DetectorNet::loadConfig()
 {	
 	//Load Cfg
 	cfgReader.init("Configuration.cfg");
-	// Load names of classes
+	cfgReader.getCfgByName(confThreshold, "Threshold");
+	// Load names of classes 00 01 10 11
 	string classesFile = pro_dir + "voc.names";
 	ifstream ifs(classesFile.c_str());
 	string line;

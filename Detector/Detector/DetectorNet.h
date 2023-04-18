@@ -25,6 +25,7 @@ private:
 	//yolov3-voc_11400.weights
 	//配置文件目录，默认项目根目录
 	string pro_dir = "";
+
 	//检测到的标签及置信度
 	vector<int> classIds;
 	vector<float> confidences;
@@ -37,6 +38,12 @@ private:
 	void loadConfig();
 	//读取配置类
 	CfgLoader cfgReader;
+
+	// 参数初始化
+	float confThreshold; // Confidence threshold
+	float nmsThreshold = 0.4;  // Non-maximum suppression threshold
+	int inpWidth = 416;  // Width of network's input image
+	int inpHeight = 416; // Height of network's input image
 
 public:
 	//初始化
