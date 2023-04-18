@@ -16,26 +16,17 @@ using namespace cv;
 using namespace dnn;
 using namespace std;
 
-// Initialize the parameters
-float confThreshold; // Confidence threshold
-float nmsThreshold = 0.4;  // Non-maximum suppression threshold
-int inpWidth = 416;  // Width of network's input image
-int inpHeight = 416; // Height of network's input image
+
 //互斥锁
-std::mutex Thread_mutex;
+extern std::mutex Thread_mutex;
+//队列1
+extern deque<Mat> Buffer;
+extern deque<string> Imagename;
+
+//Load Configuration
+CfgLoader *Configuration = CfgLoader::instance();
 
 
-vector<string> classes;
-deque<Mat> Buffer;
-deque<string> Imagename;
-
-
-//配置文件 
-//voc.names
-//yolov3-voc.cfg
-//yolov3-voc_11400.weights
-//配置文件目录，默认项目根目录
-string pro_dir = "";
 
 //违规截图存储路径，默认项目根目录
 string DirOfDetectedFrame = "";

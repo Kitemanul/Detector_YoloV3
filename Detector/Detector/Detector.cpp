@@ -13,6 +13,12 @@ const char* keys =
 "{rtsp r         |<none>|  rtsp url  }"
 ;
 
+//ª•≥‚À¯
+mutex Thread_mutex;
+//∂”¡–1
+deque<Mat> Buffer;
+deque<string> Imagename;
+
 int main(int argc, char** argv)
 {	
 	CommandLineParser parser(argc, argv, keys);
@@ -31,7 +37,7 @@ int main(int argc, char** argv)
 	Configuration->getCfgByName(DB_Name, "DB_Name");
 	Configuration->getCfgByName(DB_User, "DB_User");
 	Configuration->getCfgByName(DB_Password, "DB_Password");
-	Configuration->getCfgByName(confThreshold, "Threshold");
+
 	// Open a video file or an image file or a camera stream.	
 	VideoCapture cap=OpenInputFile(parser);
 	
@@ -44,7 +50,8 @@ int main(int argc, char** argv)
 	int i = 0;
 	int flag=0;
 	// Process frames.
-	thread Thread(ThreadProcessFrame);
+	ProcessFrame threadProcessFrame;
+	thread Thread(threadProcessFrame.ThreadProcessFrame());
 	Thread.detach();
 
 	for(;;)
