@@ -14,6 +14,8 @@ using namespace cv;
 class DetectorNet
 {   
 private:
+	//当前帧
+	Mat curFrame;
 	//使用的神经网络
 	Net yolov3Net;
 	Mat blob;
@@ -45,13 +47,23 @@ private:
 	int inpWidth = 416;  // Width of network's input image
 	int inpHeight = 416; // Height of network's input image
 
+	vector<Mat> outs;
+
+	vector<String> getOutputsNames();
+
+	//画4框
+	void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat & frame);
+
 public:
 	//初始化
 	DetectorNet();
 	//计算结果
-	void process(Mat frame);
+	void process(Mat &frame);
 	//后处理
 	void postProcess();
+
+
+
 
 };
 

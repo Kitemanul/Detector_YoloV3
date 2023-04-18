@@ -2,48 +2,7 @@
 #include "ProcessFrame.h"
 #include "pch.h"
 
-void ProcessFrame::postprocess(Mat& frame, const vector<Mat>& outs, vector<int>& classIds, vector<float>& confidences){
-	vector<Rect> boxes;
-	for (size_t i = 0; i < outs.size(); ++i)
-	{
-		// Scan through all the bounding boxes output from the network and keep only the
-		// ones with high confidence scores. Assign the box's class label as the class
-		// with the highest score for the box.
-		float* data = (float*)outs[i].data;
-		for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
-		{
-			Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
-			Point classIdPoint;
-			double confidence;
-			// Get the value and location of the maximum score
-			minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
-			if (confidence > confThreshold)
-			{
-				int centerX = (int)(data[0] * frame.cols);
-				int centerY = (int)(data[1] * frame.rows);
-				int width = (int)(data[2] * frame.cols);
-				int height = (int)(data[3] * frame.rows);
-				int left = centerX - width / 2;
-				int top = centerY - height / 2;
-				classIds.push_back(classIdPoint.x);
-				confidences.push_back((float)confidence);
-				boxes.push_back(Rect(left, top, width, height));
-			}
-		}
-	}
 
-	// Perform non maximum suppression to eliminate redundant overlapping boxes with
-	// lower confidences
-	vector<int> indices;
-	NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
-	for (size_t i = 0; i < indices.size(); ++i)
-	{
-		int idx = indices[i];
-		Rect box = boxes[idx];
-		drawPred(classIds[idx], confidences[idx], box.x, box.y,
-			box.x + box.width, box.y + box.height, frame);
-	}
-}
 
 // Draw the predicted bounding box
 void ProcessFrame::drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat& frame)
