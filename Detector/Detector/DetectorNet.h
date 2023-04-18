@@ -16,9 +16,35 @@ class DetectorNet
 private:
 	//使用的神经网络
 	Net yolov3Net;
+	Mat blob;
 	//目标识别的类别 00 01 10 11
 	vector<string> classes;
+	//配置文件 
+	//voc.names
+	//yolov3-voc.cfg
+	//yolov3-voc_11400.weights
+	//配置文件目录，默认项目根目录
+	string pro_dir = "";
+	//检测到的标签及置信度
+	vector<int> classIds;
+	vector<float> confidences;
+	vector<double> layersTimes;
+	// 神经网络配置
+	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
+	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
+	
+	//载入神经网络的配置文件
+	void loadConfig();
+	//读取配置类
+	CfgLoader cfgReader;
+
 public:
+	//初始化
 	DetectorNet();
+	//计算结果
+	void process(Mat frame);
+	//后处理
+	void postProcess();
+
 };
 
