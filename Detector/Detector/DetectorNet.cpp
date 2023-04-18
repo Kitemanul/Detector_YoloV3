@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "DetectorNet.h"
 
+
+
 DetectorNet::DetectorNet()
 {	
 	// Load names of classes
