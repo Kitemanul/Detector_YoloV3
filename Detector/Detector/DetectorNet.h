@@ -9,6 +9,7 @@
 
 using namespace std;
 using namespace cv;
+using namespace dnn;
 
 class DetectorNet
 {   
@@ -16,7 +17,7 @@ private:
 	//当前帧
 	Mat curFrame;
 	//使用的神经网络
-	dnn::Net yolov3Net;
+	Net yolov3Net;
 	Mat blob;
 	//目标识别的类别 00 01 10 11
 	vector<string> classes;
@@ -32,8 +33,8 @@ private:
 	vector<float> confidences;
 	vector<double> layersTimes;
 	// 神经网络配置
-	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
-	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
+	String modelConfiguration ;
+	String modelWeights ;
 	
 	//读取配置类
 	CfgLoader* cfgReader;

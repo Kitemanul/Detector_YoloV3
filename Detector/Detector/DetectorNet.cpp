@@ -21,6 +21,8 @@ void DetectorNet::loadConfig()
 	cfgReader->getCfgByName(pro_dir, "NNCfg_Dir");
 	// Load names of classes 00 01 10 11
 	string classesFile = pro_dir + "voc.names";
+	modelConfiguration = pro_dir + "yolov3-voc.cfg";
+	modelWeights = pro_dir + "yolov3-voc_6000.weights";
 	ifstream ifs(classesFile.c_str());
 	string line;
 	while (getline(ifs, line)) classes.push_back(line);
@@ -31,7 +33,7 @@ void DetectorNet::compute(Mat &frame)
 {	
 	curFrame = frame;
 	// Create a 4D blob from a frame.
-	dnn::blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
+	blobFromImage(frame, blob, 1 / 255.0, cvSize(inpWidth, inpHeight), Scalar(0, 0, 0), true, false);
 	//Sets the input to the network
 	yolov3Net.setInput(blob);
 	// Runs the forward pass to get output of the output layers	
@@ -92,7 +94,7 @@ void DetectorNet::postProcess() {
 	// Perform non maximum suppression to eliminate redundant overlapping boxes with
     // lower confidences
 	vector<int> indices;
-	dnn::NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
+	NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
 	for (size_t i = 0; i < indices.size(); ++i)
 	{
 		int idx = indices[i];

@@ -33,6 +33,9 @@ string DB_Password;
 string DataSource;
 db_Operator *dbo;
 
+int Interval;
+int FPS;
+
 int main(int argc, char** argv)
 {	
 	CommandLineParser parser(argc, argv, keys);
@@ -43,6 +46,7 @@ int main(int argc, char** argv)
 	}
 	//Load Cfg
 	Configuration->init("Configuration.cfg");
+	Configuration->getCfgByName(Interval,"DInterval");
 
 	// Open a video file or an image file or a camera stream.	
 	VideoCapture cap=OpenInputFile(parser);
@@ -55,11 +59,14 @@ int main(int argc, char** argv)
 	//两次检测之间间隔帧数,默认每秒处理一帧
 	int i = 0;
 	int flag=0;
-	int slot=10;
+	int slot=0;
 
-	//// Process frames.
-	thread Thread(ThreadProcessFrame);
-	Thread.detach();
+	//// 帧处理线程.
+	thread FrameThread(ThreadProcessFrame);
+	FrameThread.detach();
+	//// 数据库操作线程.
+	thread DBThread(ThreadProcessFrame);
+	DBThread.detach();
 
 	for(;;)
 	{    		
@@ -136,10 +143,15 @@ VideoCapture OpenInputFile(CommandLineParser parser)
 	return cap;
 }
 
-//线程调用函数
+//帧处理线程调用函数
 void ThreadProcessFrame() {
 	ProcessFrame threadProcessFrame;
 	threadProcessFrame.ThreadProcessFrame();
+}
+
+//数据库操作线程调用函数
+void ThreadProcessFrame() {
+   
 }
 
 

@@ -1,11 +1,11 @@
 #pragma once
 #include "db_Operator.h"
-class ThreadDBOperator
+class DBOperator
 {
 private:
 	
 public:
-	ThreadDBOperator();
+	DBOperator();
 
 
 };

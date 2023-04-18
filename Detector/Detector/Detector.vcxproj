@@ -164,7 +164,7 @@
     <ClInclude Include="DetectorNet.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessFrame.h" />
-    <ClInclude Include="ThreadDBOperator.h" />
+    <ClInclude Include="DBOperator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Configuration.cpp" />
@@ -178,7 +178,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ProcessFrame.cpp" />
-    <ClCompile Include="ThreadDBOperator.cpp" />
+    <ClCompile Include="DBOperator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

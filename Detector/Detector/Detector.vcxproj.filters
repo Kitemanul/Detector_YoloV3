@@ -33,7 +33,7 @@
     <ClInclude Include="DetectorNet.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadDBOperator.h">
+    <ClInclude Include="DBOperator.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,7 +56,7 @@
     <ClCompile Include="DetectorNet.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadDBOperator.cpp">
+    <ClCompile Include="DBOperator.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

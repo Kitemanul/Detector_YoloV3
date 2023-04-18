@@ -28,3 +28,5 @@ VideoCapture OpenInputFile(CommandLineParser parser);
 
 ////线程调用函数 处理视频帧
 void ThreadProcessFrame();
+////线程调用函数 操作数据库
+void ThreadProcessFrame();

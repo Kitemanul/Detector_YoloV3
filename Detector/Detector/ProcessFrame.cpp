@@ -13,7 +13,6 @@ ProcessFrame::ProcessFrame()
 {
 	cfgReadeer = CfgLoader::instance();
 
-
 	cfgReadeer->getCfgByName(DirOfDetectedFrame, "DetectedFrameDir");//getÎ¥¹æÍ¼Æ¬±£´æÄ¿Â¼
 	cfgReadeer->getCfgByName(Interval, "Interval");
 	cfgReadeer->getCfgByName(DInterval, "DInterval");
@@ -29,12 +28,10 @@ ProcessFrame::ProcessFrame()
 void ProcessFrame::ThreadProcessFrame()
 {
 	Mat curFrame;
-	int flag = 0;
 	string imageName;
 	while (1) {
 		Thread_mutex.lock();
 		if (!Buffer.empty()) {
-			flag = 0;
 			curFrame = Buffer.front();
 			imageName = ImageName.front();
 			Buffer.pop_front();
@@ -42,14 +39,11 @@ void ProcessFrame::ThreadProcessFrame()
 		}
 		else {
 			curFrame = NULL;
-			flag++;
+
 		}
 		Thread_mutex.unlock();
 		if (!curFrame.empty()) {
 			Process(curFrame, imageName);
-		}
-		if (flag == 10) {
-			break;
 		}
 	}
 }
@@ -78,20 +72,17 @@ void ProcessFrame::Process(Mat frame, string imageName)
 		{
 		case 1:
 			imwrite(DirOfDetectedFrame + imageName + "Warning1" + "_" + to_string(i) + ".jpg", frame);
-			dbo.db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, imageName + "Warning1" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
+			dbo.db_InsertRecord(confidences[i], 1, DirOfDetectedFrame, imageName + "Warning1" + "_" + to_string(i) + ".jpg");		
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 2:
 			imwrite(DirOfDetectedFrame + imageName + "Warning2" + "_" + to_string(i) + ".jpg", frame);
-			dbo.db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, imageName + "Warning2" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
+			dbo.db_InsertRecord(confidences[i], 2, DirOfDetectedFrame, imageName + "Warning2" + "_" + to_string(i) + ".jpg");	
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 3:
 			imwrite(DirOfDetectedFrame + imageName + "Warning3" + "_" + to_string(i) + ".jpg", frame);
 			dbo.db_InsertRecord(confidences[i], 3, DirOfDetectedFrame, imageName + "Warning3" + "_" + to_string(i) + ".jpg");
-			slot = DInterval;
 			cout << "Save Detected Frame!" << endl;
 			break;
 		case 0:break;
