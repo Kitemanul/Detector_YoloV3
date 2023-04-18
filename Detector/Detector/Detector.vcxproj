@@ -161,6 +161,7 @@
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="db_Operator.h" />
     <ClInclude Include="Detector.h" />
+    <ClInclude Include="DetectorNet.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessFrame.h" />
   </ItemGroup>
@@ -168,6 +169,7 @@
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="db_Operator.cpp" />
     <ClCompile Include="Detector.cpp" />
+    <ClCompile Include="DetectorNet.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

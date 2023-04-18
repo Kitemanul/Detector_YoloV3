@@ -30,6 +30,9 @@
     <ClInclude Include="Detector.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DetectorNet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -45,6 +48,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ProcessFrame.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DetectorNet.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

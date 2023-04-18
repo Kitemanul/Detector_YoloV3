@@ -205,26 +205,6 @@ int ProcessFrame::ProcessClass(vector<int>& classIds, int classid)
 	return false;
 }
 
-//Load Net Configurantion
-Net LoadNetCfg()
-{
-	// Load names of classes
-	string classesFile = pro_dir + "voc.names";
-	ifstream ifs(classesFile.c_str());
-	string line;
-	while (getline(ifs, line)) classes.push_back(line);
 
-	// Give the configuration and weight files for the model
-	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
-	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
-
-	// Load the network
-	Net net = readNetFromDarknet(modelConfiguration, modelWeights);
-	net.setPreferableBackend(DNN_BACKEND_OPENCV);
-	net.setPreferableTarget(DNN_TARGET_CPU);
-
-	return net;
-
-}
 
 

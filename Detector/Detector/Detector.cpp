@@ -14,7 +14,7 @@ const char* keys =
 ;
 
 int main(int argc, char** argv)
-{
+{	
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
 	if (parser.has("help")||parser.has("h")){
