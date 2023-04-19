@@ -176,7 +176,7 @@ Net LoadNetCfg()
 
 	// Give the configuration and weight files for the model
 	String modelConfiguration = pro_dir + "yolov3-voc.cfg";
-	String modelWeights = pro_dir + "yolov3-voc_6000.weights";
+	String modelWeights = pro_dir + "yolov3-voc_9000.weights";
 
 	// Load the network
 	Net net = readNetFromDarknet(modelConfiguration, modelWeights);
