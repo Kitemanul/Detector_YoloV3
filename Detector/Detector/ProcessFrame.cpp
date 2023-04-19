@@ -58,7 +58,7 @@ void ProcessFrame::Process(Mat &frame, string imageName)
 
 	Thread_mutex1.lock();
 	NetResultDO nrt(classIds,confidences,layersTimes,frame, imageName);
-	Buffer1.push_back(nrt);
+ 	Buffer1.push_back(nrt);
 	Thread_mutex1.unlock();
 	
 }

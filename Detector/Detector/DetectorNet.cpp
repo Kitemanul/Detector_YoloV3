@@ -22,7 +22,7 @@ void DetectorNet::loadConfig()
 	// Load names of classes 00 01 10 11
 	string classesFile = pro_dir + "voc.names";
 	modelConfiguration = pro_dir + "yolov3-voc.cfg";
-	modelWeights = pro_dir + "yolov3-voc_6000.weights";
+	modelWeights = pro_dir + "yolov3-voc_9000.weights";
 	ifstream ifs(classesFile.c_str());
 	string line;
 	while (getline(ifs, line)) classes.push_back(line);

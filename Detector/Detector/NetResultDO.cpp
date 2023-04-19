@@ -3,11 +3,11 @@
 
 NetResultDO::NetResultDO(vector<int> classIds, vector<float> confidences, vector<double> layersTimes,Mat frame,string ts)
 {
-	classIds = classIds;
-	confidences = confidences;
-	layersTimes = layersTimes;
-	timestamp = ts;
-	frame = frame;
+	this->classIds = classIds;
+	this->confidences = confidences;
+	this->layersTimes = layersTimes;
+	this->timestamp = ts;
+	this->frame = frame;
 }
 
 
