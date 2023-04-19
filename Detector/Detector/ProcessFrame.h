@@ -16,13 +16,6 @@
 class ProcessFrame {
 	
 public:
-
-	//数据库参数
-	string DB_Name;
-	string DB_User;
-	string DB_Password;
-	string DataSource;
-
     //违规图片保存目录
 	string dirofdetectedframe;
 	//视频流帧率
@@ -32,10 +25,6 @@ public:
 	//成功检测到目标后，下一次检测间隔时间
 	float DInterval;
 
-
-
-	string DirOfDetectedFrame;
-
 	CfgLoader * cfgReadeer;
 
 	ProcessFrame();
@@ -44,5 +33,5 @@ public:
 
 	void Process(Mat frame, string ImageName);
 
-	int ProcessClass(vector<int>& classIds, int classid);
+
 };

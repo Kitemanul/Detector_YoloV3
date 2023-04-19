@@ -15,23 +15,11 @@ const char* keys =
 
 //互斥锁
 mutex Thread_mutex;
+mutex Thread_mutex1;
 //队列1
-deque<Mat> Buffer;
+deque<FrameDO> Buffer;
+deque<NetResultDO> Buffer1;
 deque<string> ImageName;
-
-
-//Load Configuration
-CfgLoader *Configuration = CfgLoader::instance();
-
-//违规截图存储路径，默认项目根目录
-string DirOfDetectedFrame = "";
-
-//数据库配置
-string DB_Name;
-string DB_User;
-string DB_Password;
-string DataSource;
-db_Operator *dbo;
 
 int Interval;
 int FPS;
@@ -45,6 +33,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	//Load Cfg
+	CfgLoader *Configuration = CfgLoader::instance();
 	Configuration->init("Configuration.cfg");
 	Configuration->getCfgByName(Interval,"DInterval");
 
@@ -65,7 +54,7 @@ int main(int argc, char** argv)
 	thread FrameThread(ThreadProcessFrame);
 	FrameThread.detach();
 	//// 数据库操作线程.
-	thread DBThread(ThreadProcessFrame);
+	thread DBThread(ThreadDBOperate);
 	DBThread.detach();
 
 	for(;;)
@@ -78,8 +67,8 @@ int main(int argc, char** argv)
 				i = 0;
 				Thread_mutex.lock();
 				slot = Interval;
-				Buffer.push_back(Frame);
-				ImageName.push_back(db_Operator::get_CurrentTime_s());
+				FrameDO fdo(Frame, db_Operator::get_CurrentTime_s());
+				Buffer.push_back(fdo);	
 				Thread_mutex.unlock();
 				
 			};											
@@ -150,8 +139,10 @@ void ThreadProcessFrame() {
 }
 
 //数据库操作线程调用函数
-void ThreadProcessFrame() {
-   
+void ThreadDBOperate() {
+	DBOperator threadDBOperator;
+	threadDBOperator.threadInsertAlertInf();
+
 }
 
 
