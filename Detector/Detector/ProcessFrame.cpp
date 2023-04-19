@@ -46,7 +46,6 @@ void ProcessFrame::Process(Mat &frame, string imageName)
 {
 	
 	double freq = getTickFrequency() / 1000;;
-	double t;
 
 	//YOLOV3¥¶¿Ì
 	DetectorNet net;
