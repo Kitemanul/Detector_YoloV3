@@ -21,11 +21,11 @@ deque<FrameDO> Buffer;
 deque<NetResultDO> Buffer1;
 deque<string> ImageName;
 
-int Interval;
-int FPS;
+
 
 int main(int argc, char** argv)
 {	
+	int Interval;
 	CommandLineParser parser(argc, argv, keys);
 	parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
 	if (parser.has("help")||parser.has("h")){
@@ -114,14 +114,14 @@ VideoCapture OpenInputFile(CommandLineParser parser)
 			ifstream ifile(str);
 			if (!ifile) throw("error");
 			cap.open(str);
-			FPS = cap.get(CV_CAP_PROP_FPS);
+			//FPS = cap.get(CV_CAP_PROP_FPS);
 		
 		}
 		// Open the webcamstream
 		else
 		{
 			cap.open(parser.get<String>("rtsp"));
-			FPS = cap.get(CV_CAP_PROP_FPS);
+			//FPS = cap.get(CV_CAP_PROP_FPS);
 		}
 
 	}

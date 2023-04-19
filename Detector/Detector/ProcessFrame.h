@@ -31,7 +31,7 @@ public:
 
 	void ThreadProcessFrame();
 
-	void Process(Mat frame, string ImageName);
+	void Process(Mat &frame, string ImageName);
 
 
 };

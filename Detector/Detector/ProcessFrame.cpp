@@ -42,7 +42,7 @@ void ProcessFrame::ThreadProcessFrame()
 	}
 }
 
-void ProcessFrame::Process(Mat frame, string imageName)
+void ProcessFrame::Process(Mat &frame, string imageName)
 {
 	
 	double freq = getTickFrequency() / 1000;;
@@ -51,7 +51,6 @@ void ProcessFrame::Process(Mat frame, string imageName)
 	//YOLOV3处理
 	DetectorNet net;
 	net.compute(frame);
-
 	//检测到的标签及置信度
 	vector<int> classIds=net.getClassIds();
 	vector<float> confidences=net.getConfidences();
