@@ -6,13 +6,6 @@
 #include "pch.h"
 #include "Detector.h"
 
-const char* keys =
-"{help h         |      | Usage examples: \n\t\t./Detector.exe --image=dog.jpg \n\t\t./Detector.exe --video=run_sm.mp4}"
-"{image i        |<none>| input image   }"
-"{video v        |<none>| input video   }"
-"{rtsp r         |<none>|  rtsp url  }"
-;
-
 //互斥锁
 mutex Thread_mutex;
 mutex Thread_mutex1;
@@ -21,8 +14,13 @@ deque<FrameDO> Buffer;
 deque<NetResultDO> Buffer1;
 deque<string> ImageName;
 
-
-
+//帮助
+extern const char* keys =
+"{help h         |      | Usage examples: \n\t\t./Detector.exe --image=dog.jpg \n\t\t./Detector.exe --video=run_sm.mp4}"
+"{image i        |<none>| input image   }"
+"{video v        |<none>| input video   }"
+"{rtsp r         |<none>|  rtsp url  }"
+;
 int main(int argc, char** argv)
 {	
 	int Interval;
@@ -87,7 +85,6 @@ int main(int argc, char** argv)
 	}
 	//等待所有线程结束
 	destroyWindow(kWinName);
-	//Thread.join();
 	cap.release();
 	return 0;
 }
@@ -123,7 +120,6 @@ VideoCapture OpenInputFile(CommandLineParser parser)
 			cap.open(parser.get<String>("rtsp"));
 			//FPS = cap.get(CV_CAP_PROP_FPS);
 		}
-
 	}
 	catch (...) {
 		cout << "Could not open the input image/video stream" << endl;
