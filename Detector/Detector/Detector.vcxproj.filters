@@ -1,75 +1,93 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="core">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000001}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="capture">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000002}</UniqueIdentifier>
     </Filter>
-    <Filter Include="资源文件">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="inference">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000003}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="persistence">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000004}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline">
+      <UniqueIdentifier>{a1000000-0000-0000-0000-000000000005}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\core\Config.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Configuration.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\core\Log.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="db_Operator.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\core\Time.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="ProcessFrame.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\core\ThreadSafeQueue.h">
+      <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="Detector.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\capture\FrameSource.h">
+      <Filter>capture</Filter>
     </ClInclude>
-    <ClInclude Include="DetectorNet.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\inference\DetectorNet.h">
+      <Filter>inference</Filter>
     </ClInclude>
-    <ClInclude Include="DBOperator.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\inference\Frame.h">
+      <Filter>inference</Filter>
     </ClInclude>
-    <ClInclude Include="FrameDO.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\inference\Detection.h">
+      <Filter>inference</Filter>
     </ClInclude>
-    <ClInclude Include="NetResultDO.h">
-      <Filter>头文件</Filter>
+    <ClInclude Include="..\..\include\detector\persistence\ISink.h">
+      <Filter>persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\detector\persistence\FileSink.h">
+      <Filter>persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\detector\persistence\AdoConnection.h">
+      <Filter>persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\detector\persistence\SqlServerSink.h">
+      <Filter>persistence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\detector\pipeline\Pipeline.h">
+      <Filter>pipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\core\Config.cpp">
+      <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="Detector.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\core\Log.cpp">
+      <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="Configuration.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\core\Time.cpp">
+      <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="db_Operator.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\capture\FrameSource.cpp">
+      <Filter>capture</Filter>
     </ClCompile>
-    <ClCompile Include="ProcessFrame.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\inference\DetectorNet.cpp">
+      <Filter>inference</Filter>
     </ClCompile>
-    <ClCompile Include="DetectorNet.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\persistence\FileSink.cpp">
+      <Filter>persistence</Filter>
     </ClCompile>
-    <ClCompile Include="DBOperator.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\persistence\AdoConnection.cpp">
+      <Filter>persistence</Filter>
     </ClCompile>
-    <ClCompile Include="FrameDO.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\persistence\SqlServerSink.cpp">
+      <Filter>persistence</Filter>
     </ClCompile>
-    <ClCompile Include="NetResultDO.cpp">
-      <Filter>源文件</Filter>
+    <ClCompile Include="..\..\src\pipeline\Pipeline.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\pipeline\main.cpp">
+      <Filter>pipeline</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
