@@ -13,25 +13,25 @@
 #include "Detector.h"
 #include "DetectorNet.h"
 
+// Inference worker. Pulls sampled frames off the capture queue, runs YOLOv3
+// inference on them, and pushes the results onto the database queue.
 class ProcessFrame {
-	
+
 public:
-    //违规图片保存目录
+	// Output directory for violation snapshots.
 	string dirofdetectedframe;
-	//视频流帧率
+	// Source frame rate.
 	float fps;
-	//两次检测之间间隔时间
+	// Frame interval between two consecutive detections.
 	float Interval;
-	//成功检测到目标后，下一次检测间隔时间
+	// Frame interval applied after a target was successfully detected.
 	float DInterval;
 
-	CfgLoader * cfgReadeer;
+	CfgLoader * cfgReader;
 
 	ProcessFrame();
 
 	void ThreadProcessFrame();
 
 	void Process(Mat &frame, string ImageName);
-
-
 };

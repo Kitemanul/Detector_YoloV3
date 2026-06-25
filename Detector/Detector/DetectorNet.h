@@ -11,65 +11,57 @@ using namespace std;
 using namespace cv;
 using namespace dnn;
 
+// Thin wrapper around the OpenCV DNN module that loads a YOLOv3 (Darknet)
+// network and runs forward inference on a single frame.
 class DetectorNet
-{   
+{
 private:
-	//当前帧
+	// Frame currently being processed.
 	Mat curFrame;
-	//使用的神经网络
+	// The YOLOv3 network.
 	Net yolov3Net;
 	Mat blob;
-	//目标识别的类别 00 01 10 11
+	// Object class labels, e.g. 00 / 01 / 10 / 11.
 	vector<string> classes;
-	//配置文件 
-	//voc.names
-	//yolov3-voc.cfg
-	//yolov3-voc_11400.weights
-	//配置文件目录，默认项目根目录
+	// Directory holding the model files (voc.names, yolov3-voc.cfg, *.weights).
+	// Empty string means the executable's working directory.
 	string pro_dir = "";
 
-	//检测到的标签及置信度
+	// Detected class ids and their confidence scores for the current frame.
 	vector<int> classIds;
 	vector<float> confidences;
 	vector<double> layersTimes;
-	// 神经网络配置
-	String modelConfiguration ;
-	String modelWeights ;
-	
-	//读取配置类
+	// Network definition files.
+	String modelConfiguration;
+	String modelWeights;
+
+	// Configuration reader (singleton).
 	CfgLoader* cfgReader;
 
-	// 参数初始化
-	float confThreshold; // Confidence threshold
-	float nmsThreshold = 0.4;  // Non-maximum suppression threshold
-	int inpWidth = 416;  // Width of network's input image
-	int inpHeight = 416; // Height of network's input image
+	// Inference hyper-parameters.
+	float confThreshold;        // confidence threshold
+	float nmsThreshold = 0.4;   // non-maximum suppression threshold
+	int inpWidth = 416;         // width of the network's input image
+	int inpHeight = 416;        // height of the network's input image
 
 	vector<Mat> outs;
 
 	vector<String> getOutputsNames();
 
-	//画框
+	// Draw a single predicted bounding box onto the frame.
 	void drawPred(int classId, float conf, int left, int top, int right, int bottom, Mat & frame);
 
 public:
 
 	void loadConfig();
-	//构造函数
+	// Constructor: loads config and builds the network.
 	DetectorNet();
-	//计算结果
+	// Run a forward pass on the given frame.
 	void compute(Mat &frame);
-	//后处理
+	// Decode raw network output into bounding boxes and labels.
 	void postProcess();
-	//获取标签
+	// Accessors for the latest inference result.
 	vector<int> getClassIds();
-	//获取置信度
 	vector<float> getConfidences();
-	//获取处理时间
 	vector<double> getLayersTimes();
-
-
-
-
 };
-

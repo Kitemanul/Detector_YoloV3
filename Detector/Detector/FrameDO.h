@@ -2,17 +2,19 @@
 #include <opencv2/imgproc.hpp>
 using namespace std;
 using namespace cv;
+
+// Data object carried on the capture -> inference queue: one sampled frame and
+// the timestamp at which it was captured.
 class FrameDO
-{	
+{
 private:
-	//Í¼ÏñÖ¡
+	// Image frame.
 	Mat frame;
-
-	//Ê±¼ä´Á
+	// Capture timestamp.
 	string timestamp;
-public :
+public:
 
-	FrameDO(Mat frame,string ts);
+	FrameDO(Mat frame, string ts);
 
 	Mat getFrame();
 
@@ -22,4 +24,3 @@ public :
 
 	void setTimeStamp(string ts);
 };
-

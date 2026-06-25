@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "NetResultDO.h"
 
-NetResultDO::NetResultDO(vector<int> classIds, vector<float> confidences, vector<double> layersTimes,Mat frame,string ts)
+NetResultDO::NetResultDO(vector<int> classIds, vector<float> confidences, vector<double> layersTimes, Mat frame, string ts)
 {
 	this->classIds = classIds;
 	this->confidences = confidences;
@@ -38,15 +38,15 @@ string NetResultDO::getTs()
 
 void NetResultDO::setClassIds(vector<int> classIds)
 {
-	classIds = classIds;
+	this->classIds = classIds;
 }
 
 void NetResultDO::setConfidences(vector<float> confidences)
 {
-	confidences = confidences;
+	this->confidences = confidences;
 }
 
 void NetResultDO::setLayersTimes(vector<double> layersTimes)
 {
-	layersTimes = layersTimes;
+	this->layersTimes = layersTimes;
 }
