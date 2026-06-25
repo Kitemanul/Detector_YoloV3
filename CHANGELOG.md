@@ -3,6 +3,28 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+
+### Architecture overhaul
+- Reorganized the flat `Detector/Detector/` tree into a modular `include/` +
+  `src/` layout (`core`, `capture`, `inference`, `persistence`, `pipeline`).
+- Added a cross-platform **CMake** build alongside the Visual Studio solution
+  (which now references the new paths and no longer uses a precompiled header).
+- Introduced a generic **`ThreadSafeQueue<T>`**: bounded, `condition_variable`
+  -driven (no sleep-polling), with a `pushDropOldest` policy for live streams and
+  a `close()`/drain protocol for clean end-of-stream propagation. Validated under
+  ThreadSanitizer with multi-producer/consumer stress tests.
+- Replaced the detached `while(1)` worker threads + scattered globals with a
+  `Pipeline` orchestrator that owns the queues and **joins** its threads (RAII),
+  with `SIGINT`-driven graceful shutdown and exception-safe worker loops.
+- Fixed a major performance bug: the YOLOv3 network is now **loaded once** and
+  reused, instead of being rebuilt from disk for every frame.
+- Aligned detection results with NMS survivors (previously every pre-NMS box was
+  reported, causing duplicate alarms).
+- Decoupled storage behind an **`ISink`** interface: portable `FileSink`
+  (snapshots + CSV) and Windows `SqlServerSink` (ADO), selectable at build time.
+- Added a tiny thread-safe leveled logger and portable time utilities.
+
+### Earlier cleanup
 - Translated all in-code documentation from (mojibake) GBK Chinese to English.
 - Replaced manual `mutex` lock/unlock with RAII `lock_guard` across the worker
   threads.

@@ -6,16 +6,16 @@ or a live **RTSP** camera stream, detects whether each person is wearing a
 **safety helmet** and a **reflective vest**, and automatically captures and
 records every violation.
 
-The application is written in modern C++ on top of the **OpenCV DNN** module
+The application is written in modern C++17 on top of the **OpenCV DNN** module
 (YOLOv3 / Darknet) and is built around a multithreaded **producer/consumer
-pipeline** so that real-time capture is never blocked by inference or by
-database I/O.
+pipeline** with bounded, condition-variable-driven queues, so real-time capture
+is never blocked by inference or by storage I/O.
 
 <p>
-  <img alt="language" src="https://img.shields.io/badge/language-C%2B%2B-00599C">
-  <img alt="opencv" src="https://img.shields.io/badge/OpenCV-3.4.3-5C3EE8">
+  <img alt="language" src="https://img.shields.io/badge/language-C%2B%2B17-00599C">
+  <img alt="opencv" src="https://img.shields.io/badge/OpenCV-3.4%2B-5C3EE8">
   <img alt="model" src="https://img.shields.io/badge/model-YOLOv3-00FFFF">
-  <img alt="platform" src="https://img.shields.io/badge/platform-Windows-0078D6">
+  <img alt="build" src="https://img.shields.io/badge/build-CMake%20%7C%20VS2017-064F8C">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
@@ -23,17 +23,22 @@ database I/O.
 
 ## Highlights
 
-- **Real-time inference** on image / video / RTSP inputs, with configurable
-  frame sampling (≈1 frame per second by default).
-- **Three-stage concurrent pipeline** (capture → inference → persistence) using
-  `std::thread`, mutex-guarded queues and RAII locking — a slow database write
-  cannot stall the camera stream.
-- **YOLOv3 object detection** via OpenCV's DNN backend, including confidence
-  filtering and non-maximum suppression.
-- **Tiered alarms**: each detection is mapped to a severity level; violations
-  are annotated, snapshotted to disk, and persisted to **SQL Server**.
-- **External configuration** via a simple `.cfg` file — thresholds, paths,
-  sampling intervals and database credentials require no recompilation.
+- **Three-stage concurrent pipeline** (capture → inference → persistence). The
+  stages are connected by a custom **bounded, thread-safe blocking queue**
+  (`std::mutex` + two `std::condition_variable`s — no sleep-polling).
+- **Real-time backpressure policy**: file inputs apply backpressure so no frame
+  is lost; live/RTSP inputs **drop the oldest frame** under load so latency never
+  grows.
+- **Deterministic, graceful shutdown**: worker threads are RAII-joined (never
+  detached); end-of-stream propagates by closing queues; `SIGINT` triggers a
+  clean drain-and-join.
+- **YOLOv3 detection** via OpenCV DNN with confidence filtering and NMS; the
+  network is **loaded once** and reused for every frame.
+- **Pluggable persistence** behind an `ISink` interface — a portable `FileSink`
+  (snapshots + CSV) and a Windows `SqlServerSink` (ADO / SQL Server), selectable
+  at build time. The core pipeline has no Windows or database dependency.
+- **External configuration** via a simple `.cfg` file (thresholds, paths,
+  sampling interval, DB credentials) — no recompilation needed.
 
 ## Architecture
 
@@ -41,43 +46,47 @@ database I/O.
  input (image/video/RTSP)
         │
         ▼
- ┌─────────────┐  FrameDO   ┌──────────────────┐  NetResultDO  ┌────────────────┐
- │  capture    │ ─────────► │  YOLOv3 inference │ ────────────► │  persistence   │
- │ (main loop) │   Buffer   │  (ProcessFrame)   │    Buffer1    │  (DBOperator)  │
- └─────────────┘            └──────────────────┘               └────────────────┘
-                                                                  │        │
-                                                            snapshot.jpg   SQL Server
+ ┌─────────────┐  Frame    ┌──────────────────┐  Detection  ┌─────────────────┐
+ │  Capture    │ ────────► │  Inference       │ ──────────► │  Persistence    │
+ │ (run thread)│  frameQ   │  DetectorNet 1×  │   resultQ   │  classify→ISink │
+ └─────────────┘ (bounded) └──────────────────┘  (bounded)  └────────┬────────┘
+                                                                      │
+                                                        FileSink / SqlServerSink
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design, component
-breakdown, and the class → alarm-level mapping.
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the concurrency model,
+shutdown sequence, module layout, and the class → alarm-level mapping.
 
 ## Tech stack
 
 | Area | Technology |
 | --- | --- |
-| Language | C++ (VS2017 toolset `v141`, Unicode) |
-| Computer vision | OpenCV 3.4.3 (DNN, imgproc, highgui) |
+| Language | C++17 |
+| Computer vision | OpenCV (DNN, imgproc, highgui, videoio) |
 | Model | YOLOv3 (Darknet `.cfg` + `.weights`) |
-| Concurrency | `std::thread`, `std::mutex`, `std::deque` |
-| Storage | SQL Server 2017 via ADO (`msado15`) |
-| Build | Visual Studio solution (`Detector.sln`) |
+| Concurrency | `std::thread`, `std::mutex`, `std::condition_variable`, `std::atomic` |
+| Storage | Pluggable `ISink`: flat files (any OS) or SQL Server via ADO (`msado15`, Windows) |
+| Build | CMake (cross-platform) **or** Visual Studio solution (`Detector.sln`) |
 
 ## Project structure
 
 ```
 Detector_YoloV3/
-├── Detector/Detector/
-│   ├── Detector.{h,cpp}        # entry point + capture loop + thread bootstrap
-│   ├── ProcessFrame.{h,cpp}    # inference worker thread
-│   ├── DetectorNet.{h,cpp}     # OpenCV DNN / YOLOv3 wrapper
-│   ├── DBOperator.{h,cpp}      # persistence worker thread
-│   ├── db_Operator.{h,cpp}     # low-level SQL Server (ADO) access
-│   ├── Configuration.{h,cpp}   # .cfg reader (singleton)
-│   ├── FrameDO.{h,cpp}         # capture→inference queue item
-│   ├── NetResultDO.{h,cpp}     # inference→persistence queue item
-│   ├── Configuration.cfg       # runtime configuration
-│   └── Detector.sln            # Visual Studio solution
+├── CMakeLists.txt                  # cross-platform build
+├── config/Configuration.cfg        # runtime configuration
+├── include/detector/
+│   ├── core/        Config.h  Log.h  Time.h  ThreadSafeQueue.h
+│   ├── capture/     FrameSource.h
+│   ├── inference/   DetectorNet.h  Frame.h  Detection.h
+│   ├── persistence/ ISink.h  FileSink.h  SqlServerSink.h  AdoConnection.h
+│   └── pipeline/    Pipeline.h
+├── src/
+│   ├── core/        Config.cpp  Log.cpp  Time.cpp
+│   ├── capture/     FrameSource.cpp
+│   ├── inference/   DetectorNet.cpp
+│   ├── persistence/ FileSink.cpp  SqlServerSink.cpp  AdoConnection.cpp
+│   └── pipeline/    Pipeline.cpp  main.cpp
+├── Detector/Detector/Detector.sln  # Visual Studio solution (references ../../src + ../../include)
 ├── docs/ARCHITECTURE.md
 ├── CHANGELOG.md
 └── LICENSE
@@ -85,64 +94,72 @@ Detector_YoloV3/
 
 ## Prerequisites
 
-- **Windows** with **Visual Studio 2017** (or newer with the `v141` toolset).
-- **OpenCV 3.4.3** (the project links `opencv_world343.lib` / `opencv_world343d.lib`).
-- **SQL Server 2017** (and `msado15.dll`, normally at
-  `C:\Program Files\Common Files\System\ADO\`) — required only for the database
-  persistence feature.
-- YOLOv3 model files (not included in the repository):
+- A **C++17** compiler (MSVC v141+/GCC/Clang).
+- **OpenCV** (3.4+; the VS project links `opencv_world343*.lib`).
+- **SQL Server** + `msado15.dll` — only for the optional `SqlServerSink`
+  (Windows). The default `FileSink` needs nothing extra.
+- YOLOv3 model files (not included), placed in `NNCfg_Dir`:
   - `voc.names` — class labels
   - `yolov3-voc.cfg` — network definition
   - `yolov3-voc_9000.weights` — trained weights
 
 ## Build
 
-1. Open `Detector/Detector/Detector.sln` in Visual Studio.
-2. Point the project's **Include** and **Library** directories at your OpenCV
-   `build/include` and `build/x64/vc15/lib` folders (the solution currently
-   references a local OpenCV 3.4.3 path that you should update for your machine).
-3. Select the **Release | x64** configuration and build.
+### CMake (Linux / macOS / Windows)
+
+```bash
+cmake -B build -DDETECTOR_WITH_SQLSERVER=OFF   # FileSink only (default off-Windows)
+cmake --build build --config Release
+```
+
+`Configuration.cfg` is copied next to the binary automatically. Enable the SQL
+Server backend on Windows with `-DDETECTOR_WITH_SQLSERVER=ON`.
+
+### Visual Studio
+
+1. Open `Detector/Detector/Detector.sln`.
+2. Update the project's **Include**/**Library** directories to your OpenCV
+   `build/include` and `build/x64/vc15/lib` (the solution ships a sample path).
+3. Build **Release | x64** (the SQL Server sink is compiled in by default).
 
 ## Configure
 
-Edit `Detector/Detector/Configuration.cfg` (copied next to the executable at
-run time):
+Edit `config/Configuration.cfg` (copied next to the executable at run time):
 
 | Key | Description | Example |
 | --- | --- | --- |
 | `NNCfg_Dir` | Folder containing the model files | `.\nncfg\` |
-| `DetectedFrameDir` | Folder for violation snapshots | `.\result\` |
-| `Interval` | Frames between detections (≈24 fps source) | `24` |
-| `DInterval` | Frame interval after a detection | `24` |
+| `DetectedFrameDir` | Folder for violation snapshots / CSV | `.\result\` |
+| `Interval` | Frames between sampled frames (≈24 fps source) | `24` |
 | `Threshold` | Confidence threshold (0–1) | `0.9` |
-| `DataSource` | SQL Server data source | `(local)` |
+| `DataSource` | SQL Server data source (SqlServerSink) | `(local)` |
 | `DB_Name` | Database name | `SecurityDetection` |
 | `DB_User` | Database user | `sa` |
 | `DB_Password` | Database password (**do not commit real secrets**) | `CHANGE_ME` |
 
 ## Run
 
-```bat
-:: detect on a single image
-Detector.exe --image=Test\000200.jpg
+```bash
+# detect on a single image
+./Detector --image=Test/000200.jpg
 
-:: detect on a video file
-Detector.exe --video=video.mp4
+# detect on a video file
+./Detector --video=video.mp4
 
-:: detect on a live RTSP stream
-Detector.exe --rtsp=rtsp://user:password@host:port/h264/ch1/main/av_stream
+# detect on a live RTSP stream
+./Detector --rtsp=rtsp://user:password@host:port/h264/ch1/main/av_stream
 ```
 
-When a violation is detected the annotated frame is saved to `DetectedFrameDir`
-and a row is inserted into the `DetectedRecord` table (created automatically on
-first use) with the timestamp, alarm level, image name and confidence.
+Press `Ctrl+C` for a graceful shutdown. When a violation is detected the
+annotated frame is saved to `DetectedFrameDir`; the `FileSink` appends a row to
+`detections.csv`, while the `SqlServerSink` inserts a row into the
+`DetectedRecord` table (created automatically on first use).
 
-## Possible improvements / roadmap
+## Roadmap
 
-- Cross-platform build (CMake) and a CI pipeline.
-- GPU (CUDA) inference backend and upgrade to a newer detector (YOLOv5/v8).
-- Pluggable storage backends and structured logging.
-- Unit/integration tests around the configuration parser and the pipeline.
+- GPU (CUDA) inference backend and an upgrade to a newer detector (YOLOv5/v8).
+- Additional `ISink` backends (REST endpoint, message queue).
+- A CI workflow building the cross-platform core and running the queue tests.
 
 ## License
 

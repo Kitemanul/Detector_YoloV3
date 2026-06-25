@@ -273,6 +273,10 @@ yolov3-voc.cfg
 *.names
 *.weights
 
-# Project runtime artifacts
-/Detector/Detector/result/
-/Detector/Detector/nncfg/
+# CMake build output
+/build/
+
+# Project runtime artifacts (model files and detection snapshots)
+result/
+nncfg/
+detections.csv
