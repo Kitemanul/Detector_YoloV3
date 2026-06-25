@@ -260,13 +260,19 @@ paket-files/
 __pycache__/
 *.pyc
 
-#jpg
+# Media, archives and binaries
 *.jpg
-yolov3-voc.cfg
-*.names
-*.weights
 *.wmv
 *.rar
 *.exe
 *.zip
 *.avi
+
+# Model files (download separately, see README)
+yolov3-voc.cfg
+*.names
+*.weights
+
+# Project runtime artifacts
+/Detector/Detector/result/
+/Detector/Detector/nncfg/

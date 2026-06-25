@@ -5,19 +5,21 @@
 using namespace std;
 using namespace cv;
 
+// Data object carried on the inference -> database queue: the detection result
+// for one frame together with the frame itself and its timestamp.
 class NetResultDO
 {
 private:
-	//检测到的标签及置信度
-	vector<int> classIds ;
-	vector<float> confidences ;
-	vector<double> layersTimes ;
+	// Detected labels, confidences and per-layer timings.
+	vector<int> classIds;
+	vector<float> confidences;
+	vector<double> layersTimes;
 	Mat frame;
 	string timestamp;
 
-public :
+public:
 
-	NetResultDO(vector<int> classIds, vector<float> confidences, vector<double> layersTimes,Mat frame,string ts);
+	NetResultDO(vector<int> classIds, vector<float> confidences, vector<double> layersTimes, Mat frame, string ts);
 	vector<int> getClssIds();
 	vector<float> getConfidences();
 	vector<double> getLayersTimes();
@@ -27,6 +29,4 @@ public :
 	void setClassIds(vector<int> classIds);
 	void setConfidences(vector<float> confidences);
 	void setLayersTimes(vector<double> layersTimes);
-
 };
-

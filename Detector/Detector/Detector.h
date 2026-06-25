@@ -1,3 +1,4 @@
+#pragma once
 #include "pch.h"
 #include <fstream>
 #include <sstream>
@@ -18,20 +19,21 @@ using namespace cv;
 using namespace dnn;
 using namespace std;
 
-
-//互斥锁
+// Mutexes guarding the inter-thread queues.
 extern mutex Thread_mutex;
 extern mutex Thread_mutex1;
-//抓帧-处理 队列 
+
+// Capture -> inference queue.
 extern deque<FrameDO> Buffer;
 
-//处理-数据库 队列  
+// Inference -> database queue.
 extern deque<NetResultDO> Buffer1;
 
-// Load InputFile
+// Open the input source (image / video / RTSP) described on the command line.
 VideoCapture OpenInputFile(CommandLineParser parser);
 
-////线程调用函数 处理视频帧
+// Thread entry point: consumes frames and runs YOLOv3 inference.
 void ThreadProcessFrame();
-////线程调用函数 操作数据库
+
+// Thread entry point: consumes inference results and writes them to the database.
 void ThreadDBOperate();

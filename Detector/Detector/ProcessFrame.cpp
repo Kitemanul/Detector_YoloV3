@@ -1,6 +1,6 @@
-
 #include "ProcessFrame.h"
 #include "pch.h"
+#include <chrono>
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -11,59 +11,52 @@ using namespace std;
 
 ProcessFrame::ProcessFrame()
 {
-	cfgReadeer = CfgLoader::instance();
+	cfgReader = CfgLoader::instance();
 
-	cfgReadeer->getCfgByName(Interval, "Interval");
-	cfgReadeer->getCfgByName(DInterval, "DInterval");
-
-
+	cfgReader->getCfgByName(Interval, "Interval");
+	cfgReader->getCfgByName(DInterval, "DInterval");
 }
 
-//帧处理线程
+// Inference worker loop.
 void ProcessFrame::ThreadProcessFrame()
 {
 	Mat curFrame;
 	string imageName;
-	while (1) {
-		Thread_mutex.lock();
-		if (!Buffer.empty()) {
-			FrameDO fd = Buffer.front();
-			curFrame = fd.getFrame();
-			imageName = fd.getTimeStamp();
-			Buffer.pop_front();
+	while (true) {
+		bool hasFrame = false;
+		{
+			lock_guard<mutex> lock(Thread_mutex);
+			if (!Buffer.empty()) {
+				FrameDO fd = Buffer.front();
+				curFrame = fd.getFrame();
+				imageName = fd.getTimeStamp();
+				Buffer.pop_front();
+				hasFrame = true;
+			}
+		}
+		if (hasFrame && !curFrame.empty()) {
+			Process(curFrame, imageName);
 		}
 		else {
-			curFrame = NULL;
-		}
-		Thread_mutex.unlock();
-		if (!curFrame.empty()) {
-			Process(curFrame, imageName);
+			// Nothing to do; yield instead of busy-spinning the CPU.
+			this_thread::sleep_for(chrono::milliseconds(5));
 		}
 	}
 }
 
 void ProcessFrame::Process(Mat &frame, string imageName)
 {
-	
-	double freq = getTickFrequency() / 1000;;
-
-	//YOLOV3处理
+	// YOLOv3 inference.
 	DetectorNet net;
 	net.compute(frame);
-	//检测到的标签及置信度
-	vector<int> classIds=net.getClassIds();
-	vector<float> confidences=net.getConfidences();
-	vector<double> layersTimes=net.getLayersTimes();
+	// Detected labels, confidences and per-layer timings.
+	vector<int> classIds = net.getClassIds();
+	vector<float> confidences = net.getConfidences();
+	vector<double> layersTimes = net.getLayersTimes();
 
-	Thread_mutex1.lock();
-	NetResultDO nrt(classIds,confidences,layersTimes,frame, imageName);
- 	Buffer1.push_back(nrt);
-	Thread_mutex1.unlock();
-	
+	{
+		lock_guard<mutex> lock(Thread_mutex1);
+		NetResultDO nrt(classIds, confidences, layersTimes, frame, imageName);
+		Buffer1.push_back(nrt);
+	}
 }
-
-
-
-
-
-
